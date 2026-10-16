@@ -93,6 +93,11 @@ public class FacilityService {
 
 
         facilityRepository.save(facility);
+
+        if ("PRAYER_ROOM".equals(facility.getType())) {
+            zone.setHasPrayerArea(true);
+            zoneRepository.save(zone);
+        }
     }
 
 
@@ -125,6 +130,16 @@ public class FacilityService {
 
 
         facilityRepository.save(facility);
+
+        Zone zone = facility.getZone();
+
+        boolean hasPrayerRoom = facilityRepository
+                .findFacilitiesByZone_Id(zone.getId())
+                .stream()
+                .anyMatch(f -> "PRAYER_ROOM".equals(f.getType()));
+
+        zone.setHasPrayerArea(hasPrayerRoom);
+        zoneRepository.save(zone);
     }
 
 
@@ -140,6 +155,18 @@ public class FacilityService {
 
         // Delete facility without deleting its zone
         facilityRepository.delete(facility);
+
+        facilityRepository.flush();
+
+        Zone zone = facility.getZone();
+
+        boolean hasPrayerRoom = facilityRepository
+                .findFacilitiesByZone_Id(zone.getId())
+                .stream()
+                .anyMatch(f -> "PRAYER_ROOM".equals(f.getType()));
+
+        zone.setHasPrayerArea(hasPrayerRoom);
+        zoneRepository.save(zone);
     }
 
 
