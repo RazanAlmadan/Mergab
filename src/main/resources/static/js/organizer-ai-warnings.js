@@ -230,12 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
         $("aiInsufficientCount").textContent =
             formatNumber(counts.insufficient);
 
-        $("aiPredictionHorizon").textContent =
-            result.horizonMinutes != null
-                ? `التنبؤ خلال ${formatNumber(
-                    result.horizonMinutes
-                )} دقائق`
-                : "التنبؤ: —";
+        $("aiPredictionHorizon").textContent = "رصد استباقي";
 
         $("aiAnalyzedZones").textContent =
             `${formatNumber(result.analyzedZones)} من

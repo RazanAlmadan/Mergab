@@ -661,6 +661,98 @@
     color: #bc4e49;
 }
 
+/* Facility workflow UX improvements */
+
+.mergab-workflow-guide {
+    padding: 20px;
+    margin-bottom: 22px;
+    border: 1px solid #d6e7dc;
+    border-radius: 16px;
+    background: #f5faf6;
+}
+
+.mergab-workflow-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.mergab-workflow-heading > .material-symbols-rounded {
+    font-size: 26px;
+    color: #247c59;
+}
+
+.mergab-workflow-heading strong {
+    color: #174d39;
+    font-size: 15px;
+}
+
+.mergab-workflow-heading p {
+    color: #6a7b70;
+    font-size: 12px;
+    margin: 6px 0 0;
+}
+
+.mergab-workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mergab-workflow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    background: white;
+    border: 1px solid #e0eae3;
+    border-radius: 12px;
+}
+
+.mergab-step-number {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 29px;
+    height: 29px;
+    border-radius: 50%;
+    color: white;
+    background: #247c59;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.mergab-workflow-step > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mergab-workflow-step strong {
+    color: #174d39;
+    font-size: 13px;
+}
+
+.mergab-workflow-step small {
+    color: #687b6f;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.mergab-network-description {
+    margin: -3px 0 5px;
+    color: #627769;
+    font-size: 12px;
+    line-height: 1.9;
+}
+
+@media (max-width: 760px) {
+    .mergab-workflow-steps {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 800px) {
     .mergab-network-columns {
         grid-template-columns: 1fr;

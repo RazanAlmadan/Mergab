@@ -1574,6 +1574,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="material-symbols-rounded">route</span>
                     الممرات الداخلية
                 </h3>
+                
+                <p class="mergab-network-description">
+    الممر الداخلي هو الطريق الأساسي داخل المنطقة.
+    يكفي رسمه مرة واحدة، ويمكن استخدامه للوصول إلى أكثر من مرفق.
+</p>
 
                 <div class="zones-field">
                     <label for="walkRouteName">اسم الممر</label>
@@ -1639,6 +1644,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="material-symbols-rounded">alt_route</span>
                     وصلات المرافق
                 </h3>
+                
+                <p class="mergab-network-description">
+    وصلة المرفق تربط موقع المرفق بأقرب ممر داخلي محفوظ.
+    تظهر الوصلة المقترحة تلقائيًا بعد اختيار المرفق،
+    ويمكن تعديلها قبل الحفظ.
+</p>
 
                 <div class="zones-field">
                     <label for="accessFacilitySelect">المرفق</label>
@@ -1676,7 +1687,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button type="button"
                             id="startAccessDrawing"
                             class="zones-secondary-btn">
-                        رسم الوصلة
+                        تعديل مسار الوصلة
                     </button>
 
                     <button type="button"
@@ -1694,9 +1705,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
                 <small id="accessDrawingHint">
-                    ابدئي بنقطة على الممر، ثم حددي نقاط الوصول.
-                    نهاية الوصلة تُربط بموقع المرفق تلقائيًا.
-                </small>
+            اختاري المرفق لتظهر أقرب وصلة تلقائيًا.
+            ويمكنك اختيار ممر آخر أو تعديل المسار قبل الحفظ.
+            </small>
 
                 <div id="accessRoutesList"
                      class="mergab-route-list"></div>
@@ -1711,6 +1722,49 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     $("facilityManager").appendChild(networkPanel);
+
+    // Facility workflow guide - UI only
+    const facilityWorkflowGuide = document.createElement("div");
+
+    facilityWorkflowGuide.className = "mergab-workflow-guide";
+
+    facilityWorkflowGuide.innerHTML = `
+    <div class="mergab-workflow-heading">
+        <span class="material-symbols-rounded">account_tree</span>
+        <div>
+            <strong>كيف تضيفين مرفق وتربطينه بالممرات؟</strong>
+            <p>ثلاث خطوات بسيطة لإكمال شبكة الوصول للمرافق.</p>
+        </div>
+    </div>
+
+    <div class="mergab-workflow-steps">
+        <div class="mergab-workflow-step">
+            <span class="mergab-step-number">1</span>
+            <div>
+                <strong>إضافة المرفق</strong>
+                <small>حددي موقع المرفق على الخريطة واحفظيه.</small>
+            </div>
+        </div>
+
+        <div class="mergab-workflow-step">
+            <span class="mergab-step-number">2</span>
+            <div>
+                <strong>رسم الممر الداخلي</strong>
+                <small>ارسمي الممر مرة واحدة واحفظيه.</small>
+            </div>
+        </div>
+
+        <div class="mergab-workflow-step">
+            <span class="mergab-step-number">3</span>
+            <div>
+                <strong>ربط المرفق بالممر</strong>
+                <small>اختاري المرفق، راجعي الوصلة المقترحة، ثم احفظيها.</small>
+            </div>
+        </div>
+    </div>
+`;
+
+    networkPanel.prepend(facilityWorkflowGuide);
 
     // =====================================
     // API & MESSAGES
@@ -1901,7 +1955,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }, svg);
 
         const color =
-            routeDrawMode === "access" ? "#b56b12" : "#0e6348";
+            routeDrawMode === "access" ||
+            editingAccessId != null ||
+            (
+                $("accessFacilitySelect").value &&
+                routeDraft.length >= 2 &&
+                editingWalkId == null
+            )
+                ? "#b56b12"
+                : "#0e6348";
 
         routePolyline(routeDraft, layer, color);
 
@@ -2190,6 +2252,93 @@ document.addEventListener("DOMContentLoaded", () => {
         return {nearest, distance};
     }
 
+    function generateAutomaticAccess(preferredWalkId = null) {
+        if (editingAccessId != null) return;
+
+        const facilityId = $("accessFacilitySelect").value;
+
+        const facility = facilityCache.find(item =>
+            String(item.id) === facilityId
+        );
+
+        routeDrawMode = null;
+        routeDraft = [];
+        mapElement.classList.remove("is-placing");
+
+        if (
+            !facility ||
+            facility.mapX == null ||
+            facility.mapY == null
+        ) {
+            renderRouteDraft();
+            return;
+        }
+
+        const destination = [
+            Number(facility.mapX),
+            Number(facility.mapY)
+        ];
+
+        if (!destination.every(Number.isFinite)) {
+            networkNotice("موقع المرفق غير صالح", true);
+            renderRouteDraft();
+            return;
+        }
+
+        let nearestWalk = null;
+        let nearestPoint = null;
+        let nearestDistance = Infinity;
+
+        const candidates = zoneWalkPaths.filter(walk =>
+            walk.active &&
+            (preferredWalkId == null ||
+                String(walk.id) === String(preferredWalkId))
+        );
+
+        candidates.forEach(walk => {
+            const points = parseRoutePoints(walk.pathPoints);
+
+            if (points.length < 2) return;
+
+            const result = nearestPointToWalkway(
+                destination,
+                points
+            );
+
+            if (
+                result.nearest &&
+                result.distance < nearestDistance
+            ) {
+                nearestWalk = walk;
+                nearestPoint = result.nearest;
+                nearestDistance = result.distance;
+            }
+        });
+
+        if (!nearestWalk || !nearestPoint) {
+            $("accessWalkSelect").value = "";
+            $("accessDrawingHint").textContent =
+                "لا يوجد ممر نشط صالح للربط بهذا المرفق.";
+            renderRouteDraft();
+            return;
+        }
+
+        $("accessWalkSelect").value = String(nearestWalk.id);
+
+        const start = nearestPoint.map(value =>
+            Number(value.toFixed(4))
+        );
+
+        // البداية من الممر، والنهاية عند المرفق.
+        routeDraft = [start, destination];
+
+        $("accessDrawingHint").textContent =
+            `تم اقتراح وصلة عبر «${nearestWalk.name}». ` +
+            "يمكنك تعديلها أو حفظها مباشرة.";
+
+        renderRouteDraft();
+    }
+
     function editAccessRoute(path) {
         stopRouteDrawing();
 
@@ -2274,10 +2423,40 @@ document.addEventListener("DOMContentLoaded", () => {
         resetAccessEditor
     );
 
+    $("accessFacilitySelect").addEventListener(
+        "change",
+        () => {
+            if (editingAccessId != null) return;
+            generateAutomaticAccess();
+        }
+    );
+
+    $("accessWalkSelect").addEventListener(
+        "change",
+        () => {
+            if (editingAccessId != null) return;
+
+            const walkId = $("accessWalkSelect").value;
+
+            if (walkId) {
+                generateAutomaticAccess(walkId);
+            } else {
+                generateAutomaticAccess();
+            }
+        }
+    );
+
     $("undoRoutePoint").addEventListener("click", () => {
         if (!routeDrawMode) return;
 
-        routeDraft.pop();
+        if (routeDrawMode === "access") {
+            if (routeDraft.length > 2) {
+                routeDraft.splice(-2, 1);
+            }
+        } else {
+            routeDraft.pop();
+        }
+
         renderRouteDraft();
     });
 
@@ -2317,30 +2496,38 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (
-            editingAccessId == null &&
-            !$("accessWalkSelect").value
-        ) {
-            networkNotice("اختاري الممر أولًا", true);
-            return;
-        }
-
         if (editingWalkId != null) {
             resetWalkEditor();
         }
 
+        // توليد الوصلة أولًا إن لم توجد معاينة.
+        if (routeDraft.length < 2) {
+            generateAutomaticAccess();
+        }
+
+        if (routeDraft.length < 2) {
+            networkNotice(
+                "تعذر تجهيز الوصلة. تأكدي من المرفق والممر.",
+                true
+            );
+            return;
+        }
+
         facilityPicking = false;
 
-        mapElement.querySelector("#facilityPreviewPin")?.remove();
+        mapElement.querySelector(
+            "#facilityPreviewPin"
+        )?.remove();
 
         routeDrawMode = "access";
-        routeDraft = [];
-
         mapElement.classList.add("is-placing");
 
         setMapStatus(
-            "ابدئي من الممر، ثم ارسمي نقاط الوصلة"
+            "اضغطي على الخريطة لإضافة نقاط انعطاف بين الممر والمرفق"
         );
+
+        $("accessDrawingHint").textContent =
+            "اختاري المرفق لتوليد أقرب وصلة تلقائيًا.";
 
         mapElement.scrollIntoView({
             behavior: "smooth",
@@ -2396,43 +2583,19 @@ document.addEventListener("DOMContentLoaded", () => {
             Number(y.toFixed(2))
         ];
 
-        if (
-            routeDrawMode === "access" &&
-            routeDraft.length === 0
-        ) {
-            const selected = zoneWalkPaths.find(path =>
-                String(path.id) ===
-                $("accessWalkSelect").value
+        if (routeDrawMode === "access") {
+            // إدراج نقاط الانعطاف قبل المرفق،
+            // مع الحفاظ على بداية الوصلة ونهايتها.
+            routeDraft.splice(routeDraft.length - 1, 0, point);
+
+            renderRouteDraft();
+
+            setMapStatus(
+                `تمت إضافة نقطة انعطاف. ` +
+                `عدد نقاط المسار: ${routeDraft.length}`
             );
 
-            if (selected) {
-                const result = nearestPointToWalkway(
-                    point,
-                    parseRoutePoints(selected.pathPoints)
-                );
-
-                if (
-                    result.distance > 0.5 ||
-                    !result.nearest
-                ) {
-                    networkNotice(
-                        "ابدئي أول نقطة فوق الممر المرتبط",
-                        true
-                    );
-                    return;
-                }
-
-                point = result.nearest.map(number =>
-                    Number(number.toFixed(4))
-                );
-
-            } else if (editingAccessId == null) {
-                networkNotice(
-                    "اختاري الممر الصحيح",
-                    true
-                );
-                return;
-            }
+            return;
         }
 
         routeDraft.push(point);
