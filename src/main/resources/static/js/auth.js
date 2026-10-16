@@ -9,7 +9,7 @@
     const ROLE_HOME = {
         ADMIN: "/admin",
         ORGANIZER: "/organizer/dashboard",
-        VISITOR: "/visitor"
+        VISITOR: "/"
     };
 
     function getSession() {

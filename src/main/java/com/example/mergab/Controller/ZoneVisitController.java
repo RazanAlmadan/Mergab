@@ -3,10 +3,12 @@ package com.example.mergab.Controller;
 
 import com.example.mergab.Api.ApiResponse;
 import com.example.mergab.DTO.QrScanDTO;
+import com.example.mergab.Model.User;
 import com.example.mergab.Service.ZoneVisitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,5 +72,10 @@ public class ZoneVisitController {
     public ResponseEntity<?> getActiveVisitByQr(@RequestBody @Valid QrScanDTO dto) {
 
         return ResponseEntity.status(200).body(zoneVisitService.getActiveVisitByQr(dto.getQrToken()));
+    }
+
+    @GetMapping("/my-history")
+    public ResponseEntity<?> getMyHistory(@AuthenticationPrincipal User user) {
+        return ResponseEntity.status(200).body(zoneVisitService.getVisitorHistory(user.getId()));
     }
 }

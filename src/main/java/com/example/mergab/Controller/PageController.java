@@ -25,7 +25,7 @@ public class PageController {
 
     @GetMapping("/visitor")
     public String visitorHome() {
-        return "visitor/index";
+        return "redirect:/";
     }
 
     @GetMapping("/visitor/map")

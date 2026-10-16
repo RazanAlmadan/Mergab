@@ -1,42 +1,57 @@
-<!doctype html>
-<html>
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="../static/img/favicon.png">
-<title data-i18n="fb.title">مرقاب</title>
-<script src="../static/js/i18n.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;600;700&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
-<link rel="stylesheet" href="../static/css/mergab.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>غير مصرح بالدخول | مِرقاب</title>
+  <link rel="icon" href="/img/favicon.png">
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    .forbidden-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: #f8f7f3;
+      text-align: center;
+    }
+    .forbidden-card {
+      background: white;
+      border: 1px solid #e2e8e2;
+      border-radius: 20px;
+      padding: 45px 30px;
+      max-width: 480px;
+      width: 100%;
+    }
+    .forbidden-card h1 {
+      color: #0e3d32;
+      margin: 15px 0;
+    }
+    .forbidden-card p {
+      color: #64776e;
+      margin-bottom: 25px;
+    }
+    .forbidden-card a {
+      display: inline-block;
+      padding: 12px 20px;
+      margin: 5px;
+      border-radius: 10px;
+      background: #0e5946;
+      color: white;
+      text-decoration: none;
+    }
+  </style>
 </head>
-<body style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
-<main class="card card-pad" style="width:min(460px,100%);text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 28px 36px;overflow:hidden">
-  <div class="sadu sadu-thin" aria-hidden="true" style="margin:0 -28px 18px;width:calc(100% + 56px)"></div>
-  <span aria-hidden="true" style="width:64px;height:64px;border-radius:18px;background:#FBECEA;color:#B03A2E;display:flex;align-items:center;justify-content:center">
-    <span class="msr" style="font-size:32px">lock</span>
-  </span>
-  <span style="font-family:var(--display);font-size:15px;color:var(--muted);font-weight:600">403</span>
-  <h1 style="font-size:26px" data-i18n="fb.h1"></h1>
-  <p style="margin:0;color:var(--muted)" id="msg" data-i18n="fb.msg"></p>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px">
-    <a class="btn btn-primary" id="homeBtn" href="visitor/index.html" data-i18n="fb.home"></a>
-    <button type="button" class="btn btn-ghost" id="switchBtn" data-i18n="fb.switch"></button>
+<body>
+<main class="forbidden-page">
+  <div class="forbidden-card">
+    <img src="/img/logo.png" alt="مِرقاب" width="160">
+    <h1>403 — غير مصرح بالدخول</h1>
+    <p>ليس لديك صلاحية للوصول إلى هذه الصفحة.</p>
+    <a href="/">الرئيسية</a>
+    <a href="/login">تسجيل الدخول</a>
   </div>
 </main>
-<script src="../static/js/site-config.js"></script>
-<script src="../static/js/mock-server.js"></script>
-<script src="../static/js/api.js"></script>
-<script>
-  const { auth, roleBadge } = Mergab;
-  const me = auth.get();
-  document.getElementById('switchBtn').addEventListener('click', () => auth.logout());
-  document.addEventListener('DOMContentLoaded', () => {
-    if (!me) return;
-    document.getElementById('msg').innerHTML = t('fb.msgRole', { r: roleBadge(me.role) });
-    document.getElementById('homeBtn').href = auth.home(me.role);
-  });
-</script>
 </body>
 </html>

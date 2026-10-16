@@ -1,95 +1,409 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="../assets/img/favicon.png">
-<title data-i18n="events.title">مرقاب</title>
-<script src="../assets/js/i18n.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;600;700&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/mergab.css">
-</head>
-<body>
-<header id="vHeader"></header>
 
-<main class="v-wrap">
-  <div class="v-map-head">
-    <div><h1 class="section-title-sa" data-i18n="events.h1"></h1><p data-i18n="events.sub"></p></div>
-    <label class="o-search" style="flex:0 1 340px;min-height:44px">
-      <span class="sr-only" data-i18n="events.search"></span>
-      <input type="search" id="search" data-i18n-placeholder="events.search">
-    </label>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الفعاليات | مِرقاب</title>
+
+  <link rel="icon" href="/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/mergab.css">
+
+  <script defer src="/js/base.js"></script>
+
+  <style>
+    .ve-page {
+      max-width: 1160px;
+      margin: auto;
+      padding: 45px 22px 80px;
+    }
+
+    .ve-heading { margin-bottom: 28px; }
+    .ve-heading h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      color: #0E3D32;
+      margin-bottom: 10px;
+    }
+    .ve-heading p { color: #64776e; }
+
+    .ve-toolbar {
+      background: #fff;
+      border: 1px solid #e2e9e3;
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .ve-toolbar input, .ve-toolbar select {
+      border: 1px solid #d8e1da;
+      border-radius: 11px;
+      padding: 12px 14px;
+      min-height: 46px;
+      background: #fff;
+      font: inherit;
+    }
+
+    .ve-toolbar input { flex: 2 1 260px; }
+    .ve-toolbar select { flex: 1 1 190px; }
+
+    .ve-filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .ve-filters button {
+      border: 1px solid #dae3dc;
+      background: #fff;
+      border-radius: 40px;
+      padding: 10px 20px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .ve-filters button.active {
+      background: #0E3D32;
+      color: #fff;
+    }
+
+    .ve-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .ve-card {
+      border: 1px solid #e2e9e3;
+      border-radius: 19px;
+      background: #fff;
+      overflow: hidden;
+      padding: 23px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .ve-card h2 {
+      color: #0E3D32;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+
+    .ve-card .meta {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #586c60;
+      font-size: 14px;
+    }
+
+    .ve-card .material-symbols-rounded { font-size: 20px; }
+
+    .ve-badge {
+      align-self: flex-start;
+      border-radius: 50px;
+      padding: 6px 12px;
+      background: #e8f3ed;
+      color: #165a43;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .ve-card a {
+      margin-top: auto;
+      text-align: center;
+    }
+
+    .ve-empty {
+      padding: 55px 20px;
+      text-align: center;
+      color: #61766a;
+      background: #fff;
+      border-radius: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .ve-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 600px) {
+      .ve-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+
+<main class="ve-page">
+  <div class="ve-heading">
+    <h1 id="eventsTitle">فعاليات إكسبو</h1>
+    <p id="eventsDescription">
+      اكتشف الفعاليات القادمة واختر وجهتك داخل المعرض.
+    </p>
   </div>
 
-  <div class="chips" id="when" role="group" data-i18n-aria="events.when" style="margin-bottom:10px"></div>
-  <div class="chips" id="zoneChips" role="group" data-i18n-aria="events.zone" style="margin-bottom:20px"></div>
+  <div class="ve-toolbar">
+    <input id="eventSearch" type="search"
+           placeholder="ابحث عن فعالية أو منطقة..."
+           aria-label="البحث عن فعالية">
 
-  <div class="event-grid" id="events"></div>
+    <select id="zoneFilter" aria-label="تصفية حسب المنطقة">
+      <option value="all">جميع المناطق</option>
+    </select>
+  </div>
+
+  <div class="ve-filters" id="timeFilters">
+    <button type="button" data-when="upcoming" class="active">
+      القادمة
+    </button>
+    <button type="button" data-when="today">اليوم</button>
+    <button type="button" data-when="tomorrow">بكرة</button>
+    <button type="button" data-when="all">الكل</button>
+  </div>
+
+  <div id="eventsGrid" class="ve-grid" aria-live="polite"></div>
+  <div id="eventsMessage" class="ve-empty" role="status">
+    جاري تحميل الفعاليات...
+  </div>
 </main>
 
-<footer id="vFooter"></footer>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 
-<script src="../assets/js/site-config.js"></script>
-<script src="../assets/js/mock-server.js"></script>
-<script src="../assets/js/api.js"></script>
-<script src="../assets/js/visitor.js"></script>
 <script>
-  const { api, esc, level, zoneName, fmtTime, fmtDate, toDate, isToday } = Mergab;
-  const I = Visitor.icon;
-  const params = new URLSearchParams(location.search);
-  let ZONES = [], EVENTS = [], when = params.get('when') || 'upcoming', zone = 'all', q = '';
-  const WHEN = ['upcoming', 'today', 'tomorrow', 'all'];
+  document.addEventListener("DOMContentLoaded", () => {
+    const $ = id => document.getElementById(id);
 
-  function chipGroup(el, items, current) {
-    el.innerHTML = items.map(i => `<button type="button" class="chip" data-v="${esc(i[0])}" aria-pressed="${i[0] === current}">${esc(i[1])}</button>`).join('');
-  }
-  const zoneItems = () => [['all', t('events.allZones')]].concat(ZONES.map(z => [String(z.id), zoneName(z)]));
+    const words = {
+      ar: {
+        title: "فعاليات إكسبو",
+        description: "اكتشف الفعاليات القادمة واختر وجهتك داخل المعرض.",
+        search: "ابحث عن فعالية أو منطقة...",
+        zones: "جميع المناطق",
+        upcoming: "القادمة",
+        today: "اليوم",
+        tomorrow: "بكرة",
+        all: "الكل",
+        live: "تقام الآن",
+        upcomingBadge: "قادمة",
+        finished: "انتهت",
+        onMap: "عرض على الخريطة",
+        empty: "ما فيه فعاليات مطابقة حاليًا.",
+        error: "تعذر تحميل الفعاليات.",
+        loading: "جاري تحميل الفعاليات..."
+      },
+      en: {
+        title: "Expo Events",
+        description: "Discover upcoming events and find your destination.",
+        search: "Search events or zones...",
+        zones: "All zones",
+        upcoming: "Upcoming",
+        today: "Today",
+        tomorrow: "Tomorrow",
+        all: "All",
+        live: "Happening now",
+        upcomingBadge: "Upcoming",
+        finished: "Finished",
+        onMap: "View on map",
+        empty: "No matching events.",
+        error: "Unable to load events.",
+        loading: "Loading events..."
+      }
+    };
 
-  function render() {
-    const now = new Date(), tm = new Date(); tm.setDate(tm.getDate() + 1);
-    let list = EVENTS.slice();
-    if (when === 'upcoming') list = list.filter(e => toDate(e.endDateTime) >= now);
-    if (when === 'today') list = list.filter(e => isToday(e.startDateTime));
-    if (when === 'tomorrow') list = list.filter(e => toDate(e.startDateTime).toDateString() === tm.toDateString());
-    if (zone !== 'all') list = list.filter(e => e.zone && String(e.zone.id) === zone);
-    if (q) list = list.filter(e => e.name.toLowerCase().includes(q) || zoneName(e.zone).toLowerCase().includes(q));
-    list.sort((a, b) => toDate(a.startDateTime) - toDate(b.startDateTime));
+    const language = () =>
+            window.Mergab?.getLanguage?.() === "en" ? "en" : "ar";
 
-    document.getElementById('events').innerHTML = list.length ? list.map(e => {
-      const z = ZONES.find(x => e.zone && x.id === e.zone.id) || e.zone || {};
-      const lv = z.capacity ? level(z.initialVisitors, z.capacity) : null;
-      const live = toDate(e.startDateTime) <= now && toDate(e.endDateTime) >= now;
-      return `<article class="card event-card">
-        <div class="art" style="${Visitor.zoneArt(z)}"><span class="img-shade"></span><span class="badge" style="position:relative">${live ? '● ' + esc(t('now')) : (isToday(e.startDateTime) ? esc(t('today')) : fmtDate(e.startDateTime))}</span></div>
-        <div class="body"><h3>${esc(e.name)}</h3>
-          <span class="row">${I('clock', 16)}${fmtTime(e.startDateTime)} – ${fmtTime(e.endDateTime)}</span>
-          <span class="row">${I('pin', 16)}${esc(zoneName(z))}</span>
-          <div class="foot">
-            ${lv ? `<span class="badge" style="background:${lv.soft};color:#14211C">${esc(t('crowd', { l: lv.label }))}</span>` : '<span></span>'}
-            <a class="v-link" href="map.html?zone=${encodeURIComponent(z.name || '')}">${esc(t('onMap'))} ${Visitor.next(14)}</a>
-          </div></div></article>`;
-    }).join('') : `<div class="empty">${esc(t('events.empty'))}</div>`;
-  }
+    const tr = key => words[language()][key];
 
-  const whenEl = document.getElementById('when'), zoneEl = document.getElementById('zoneChips');
-  const whenItems = WHEN.map(w => [w, t('chip.' + w)]);
-  chipGroup(whenEl, whenItems, when);
-  whenEl.addEventListener('click', e => {
-    const b = e.target.closest('[data-v]'); if (!b) return;
-    when = b.dataset.v; chipGroup(whenEl, whenItems, when); render();
-  });
-  zoneEl.addEventListener('click', e => {
-    const b = e.target.closest('[data-v]'); if (!b) return;
-    zone = b.dataset.v; chipGroup(zoneEl, zoneItems(), zone); render();
-  });
-  document.getElementById('search').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
+    const escapeHtml = value =>
+            String(value ?? "").replace(/[&<>"']/g, char => ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;"
+            }[char]));
 
-  document.getElementById('events').innerHTML = `<div class="empty">${esc(t('loading'))}</div>`;
-  Promise.all([api.get('/zone/get'), api.get('/expo-event/get')]).then(([zs, evs]) => {
-    ZONES = zs; EVENTS = evs;
-    chipGroup(zoneEl, zoneItems(), zone);
+    const params = new URLSearchParams(location.search);
+
+    let events = [];
+    let zones = [];
+    let loaded = false;
+    let failed = false;
+    let when = ["today", "tomorrow", "all", "upcoming"]
+            .includes(params.get("when"))
+            ? params.get("when") : "upcoming";
+
+    let zoneId = params.get("zone") || "all";
+    let search = params.get("q") || "";
+
+    $("eventSearch").value = search;
+
+    function dateOnly(value) {
+      const date = new Date(value);
+      return [date.getFullYear(), date.getMonth(), date.getDate()].join("-");
+    }
+
+    function render() {
+      const now = new Date();
+      const tomorrow = new Date();
+      tomorrow.setDate(now.getDate() + 1);
+
+      $("eventsTitle").textContent = tr("title");
+      $("eventsDescription").textContent = tr("description");
+      $("eventSearch").placeholder = tr("search");
+
+      $("timeFilters").querySelectorAll("button").forEach(button => {
+        button.textContent = tr(button.dataset.when);
+        button.classList.toggle("active", button.dataset.when === when);
+        button.setAttribute("aria-pressed", String(button.dataset.when === when));
+      });
+
+      $("zoneFilter").innerHTML =
+              `<option value="all">${escapeHtml(tr("zones"))}</option>` +
+              zones.map(z => `<option value="${escapeHtml(z.id)}">${escapeHtml(z.name)}</option>`).join("");
+
+      $("zoneFilter").value = zones.some(z => String(z.id) === zoneId)
+              ? zoneId : "all";
+
+      if (!loaded) {
+        $("eventsMessage").hidden = false;
+        $("eventsMessage").textContent = failed ? tr("error") : tr("loading");
+        return;
+      }
+
+      let result = events.filter(event => {
+        const start = new Date(event.startDateTime);
+        const end = new Date(event.endDateTime);
+
+        if (when === "upcoming" && end < now) return false;
+        if (when === "today" &&
+                !(start <= new Date(new Date(now).setHours(23,59,59,999)) &&
+                        end >= new Date(new Date(now).setHours(0,0,0,0)))) return false;
+
+        if (when === "tomorrow" &&
+                !(start <= new Date(new Date(tomorrow).setHours(23,59,59,999)) &&
+                        end >= new Date(new Date(tomorrow).setHours(0,0,0,0)))) return false;
+
+        if (zoneId !== "all" && String(event.zone?.id) !== zoneId) return false;
+
+        const text = (event.name + " " + (event.zone?.name || "")).toLowerCase();
+        if (search && !text.includes(search.toLowerCase())) return false;
+
+        return true;
+      }).sort((a, b) =>
+              new Date(a.startDateTime) - new Date(b.startDateTime)
+      );
+
+      const locale = language() === "ar" ? "ar-SA" : "en-GB";
+
+      $("eventsGrid").innerHTML = result.map(event => {
+        const start = new Date(event.startDateTime);
+        const end = new Date(event.endDateTime);
+
+        const live = start <= now && end >= now;
+        const finished = end < now;
+
+        const badge = live ? tr("live") :
+                finished ? tr("finished") : tr("upcomingBadge");
+
+        const date = new Intl.DateTimeFormat(locale, {
+          day: "numeric", month: "short", year: "numeric"
+        }).format(start);
+
+        const time = new Intl.DateTimeFormat(locale, {
+          hour: "numeric", minute: "2-digit"
+        });
+
+        return `
+                <article class="ve-card">
+                    <span class="ve-badge">${escapeHtml(badge)}</span>
+
+                    <h2>${escapeHtml(event.name)}</h2>
+
+                    <div class="meta">
+                        <span class="material-symbols-rounded">calendar_month</span>
+                        <span>${escapeHtml(date)}</span>
+                    </div>
+
+                    <div class="meta">
+                        <span class="material-symbols-rounded">schedule</span>
+                        <span>${escapeHtml(time.format(start))} – ${escapeHtml(time.format(end))}</span>
+                    </div>
+
+                    <div class="meta">
+                        <span class="material-symbols-rounded">location_on</span>
+                        <span>${escapeHtml(event.zone?.name || "—")}</span>
+                    </div>
+
+                    <a class="btn btn-primary"
+                       href="/visitor/map?zone=${encodeURIComponent(event.zone?.id ?? "")}">
+                        ${escapeHtml(tr("onMap"))}
+                    </a>
+                </article>
+            `;
+      }).join("");
+
+      $("eventsMessage").hidden = result.length > 0;
+      $("eventsMessage").textContent = tr("empty");
+    }
+
+    $("timeFilters").addEventListener("click", event => {
+      const button = event.target.closest("[data-when]");
+      if (!button) return;
+      when = button.dataset.when;
+      render();
+    });
+
+    $("zoneFilter").addEventListener("change", event => {
+      zoneId = event.target.value;
+      render();
+    });
+
+    $("eventSearch").addEventListener("input", event => {
+      search = event.target.value.trim();
+      render();
+    });
+
+    document.addEventListener("mergab:languageChanged", render);
+
+    async function getList(path) {
+      const response = await fetch("/api/v1" + path, {
+        headers: {Accept: "application/json"},
+        cache: "no-store"
+      });
+
+      if (!response.ok) throw new Error("API " + response.status);
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : (data.data || []);
+    }
+
+    Promise.all([
+      getList("/zone/get"),
+      getList("/expo-event/get")
+    ]).then(([zoneData, eventData]) => {
+      zones = zoneData;
+      events = eventData;
+      loaded = true;
+      render();
+    }).catch(error => {
+      console.error("Visitor events:", error);
+      failed = true;
+      render();
+    });
+
     render();
   });
 </script>

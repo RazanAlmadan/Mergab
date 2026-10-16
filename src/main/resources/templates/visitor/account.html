@@ -1,226 +1,860 @@
-<!doctype html>
-<html>
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="../assets/img/favicon.png">
-<title data-i18n="acc.title">مرقاب</title>
-<script src="../assets/js/i18n.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@500;600;700&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/mergab.css">
-<style>
-  .acc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 20px; align-items: start; }
-  @media (max-width: 900px) { .acc-grid { grid-template-columns: minmax(0, 1fr); } }
-  .saved { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid #F0ECE3; }
-  .saved:first-child { border-top: 0; }
-  .saved .thumb { width: 64px; height: 52px; border-radius: 12px; flex: none; }
-  .saved .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حساب الزائر | مِرقاب</title>
+
+  <link rel="icon" href="/img/favicon.png">
+  <link rel="stylesheet" href="/css/base.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
+
+  <script defer src="/js/base.js"></script>
+  <script defer src="/js/auth.js"></script>
+
+  <style>
+    .va-page {
+      max-width: 1100px;
+      margin: auto;
+      padding: 42px 22px 80px;
+      font-family: "IBM Plex Sans Arabic", sans-serif;
+    }
+
+    .va-page [hidden] {
+      display: none !important;
+    }
+
+    .va-heading {
+      margin-bottom: 30px;
+    }
+
+    .va-heading h1 {
+      color: #0E3D32;
+      font-size: clamp(28px, 4vw, 38px);
+      margin-bottom: 10px;
+    }
+
+    .va-muted {
+      color: #64776e;
+      font-size: 14px;
+      line-height: 1.9;
+    }
+
+    /* Account Tabs */
+
+    .va-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 800px;
+      margin: 0 auto 22px;
+      padding: 7px;
+      background: #edf2ee;
+      border-radius: 16px;
+    }
+
+    .va-tab {
+      flex: 1 1 170px;
+      padding: 13px 16px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: #52665c;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .va-tab:hover {
+      color: #0E5946;
+    }
+
+    .va-tab[aria-selected="true"] {
+      background: white;
+      color: #0E5946;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+    }
+
+    /* Content */
+
+    .va-panel {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .va-card {
+      background: white;
+      border: 1px solid #e5ebe6;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.04);
+    }
+
+    .va-card h2 {
+      color: #0E3D32;
+      font-size: 22px;
+      margin: 0 0 8px;
+    }
+
+    /* QR Card */
+
+    .va-qr-container {
+      max-width: 300px;
+      margin: 26px auto;
+      padding: 18px;
+      border: 1px solid #e3eae4;
+      border-radius: 18px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .va-qr {
+      width: 100%;
+      max-width: 230px;
+      aspect-ratio: 1;
+      object-fit: contain;
+      display: block;
+      margin: auto;
+    }
+
+    .va-qr-container p {
+      color: #64776e;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+
+    .va-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .va-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 22px;
+      background: #0E5946;
+      color: white;
+      border: none;
+      border-radius: 11px;
+      text-decoration: none;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .va-btn.secondary {
+      background: #e8f1eb;
+      color: #0E5946;
+    }
+
+    .va-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* Profile */
+
+    .va-form {
+      max-width: 550px;
+      margin-top: 25px;
+    }
+
+    .va-field {
+      display: block;
+      margin-bottom: 18px;
+    }
+
+    .va-field > span {
+      display: block;
+      color: #263e32;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .va-field input,
+    .va-field select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      border: 1px solid #d6e1d9;
+      border-radius: 11px;
+      background: white;
+      font: inherit;
+    }
+
+    .va-field input[readonly] {
+      background: #f5f7f5;
+      color: #64776e;
+    }
+
+    .va-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .va-message {
+      margin-top: 16px;
+      color: #0E5946;
+      font-size: 14px;
+    }
+
+    /* History */
+
+    .va-visit {
+      border: 1px solid #e1e9e2;
+      border-radius: 14px;
+      padding: 19px;
+      margin-top: 14px;
+      background: #fcfdfb;
+    }
+
+    .va-visit strong {
+      display: block;
+      color: #0E3D32;
+      font-size: 17px;
+      margin-bottom: 10px;
+    }
+
+    .va-visit p {
+      color: #64776e;
+      margin: 7px 0;
+    }
+
+    .va-status {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 30px;
+      background: #e8f3ed;
+      color: #0E5946;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    /* QR Modal */
+
+    .va-dialog {
+      border: none;
+      border-radius: 20px;
+      padding: 28px;
+      text-align: center;
+      max-width: calc(100vw - 40px);
+    }
+
+    .va-dialog::backdrop {
+      background: rgba(0,0,0,.65);
+    }
+
+    .va-dialog img {
+      width: min(300px, 75vw);
+      display: block;
+      margin: 20px auto;
+    }
+
+    @media(max-width: 600px) {
+      .va-page {
+        padding: 25px 15px 60px;
+      }
+
+      .va-card {
+        padding: 22px;
+      }
+
+      .va-tab {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header id="vHeader"></header>
 
-<main class="v-wrap" style="padding-top:28px">
-  <div class="note" id="welcome" hidden style="background:#E3F2E9;border-color:#C5E3D1;color:#1F6B45;font-size:15px;margin-bottom:18px" data-i18n-html="acc.welcome"></div>
+<header th:replace="~{fragments/layout :: navbar}"></header>
 
-  <div class="v-map-head" style="padding-top:0">
-    <div><h1 id="hello" class="section-title-sa"></h1><p data-i18n="acc.sub"></p></div>
+<main class="va-page">
+
+  <div class="va-heading">
+    <h1>حسابي في مِرقاب</h1>
+    <p class="va-muted">
+      بطاقتك الرقمية ومعلوماتك الشخصية وسجل زياراتك.
+    </p>
   </div>
 
-  <div class="card-row">
-    <section aria-labelledby="cardT">
-      <h2 id="cardT" class="sr-only" data-i18n="card.title"></h2>
-      <div class="entry-card">
-        <div class="geo" aria-hidden="true"></div>
-        <div class="sadu sadu-thin" aria-hidden="true"></div>
-        <div class="in">
-          <div class="top"><img id="cardLogo" alt="Mergab"><span data-i18n="card.label"></span></div>
-          <div class="who"><b id="cardName"></b><small data-i18n="card.sub"></small></div>
-          <button type="button" class="qr-box" id="qrBox" style="border:0;cursor:zoom-in" data-i18n-aria="card.full"><span class="empty" data-i18n="loading"></span></button>
-          <div class="entry-status" id="entryStatus"><i></i><span></span></div>
-          <div class="entry-actions">
-            <a class="btn btn-gold" id="dlBtn" download="mergab-card.png" href="#"></a>
-            <button type="button" class="btn btn-on-dark" id="fullBtn"></button>
-          </div>
-          <button type="button" class="entry-demo" id="demoBtn" hidden></button>
-        </div>
+  <!-- Navigation Tabs -->
+
+  <nav class="va-tabs" role="tablist" aria-label="أقسام حساب الزائر">
+
+    <button type="button"
+            class="va-tab"
+            role="tab"
+            id="tabQr"
+            data-tab="qr"
+            aria-controls="panelQr"
+            aria-selected="true">
+      بطاقتي الرقمية
+    </button>
+
+    <button type="button"
+            class="va-tab"
+            role="tab"
+            id="tabInfo"
+            data-tab="info"
+            aria-controls="panelInfo"
+            aria-selected="false">
+      معلوماتي
+    </button>
+
+    <button type="button"
+            class="va-tab"
+            role="tab"
+            id="tabHistory"
+            data-tab="history"
+            aria-controls="panelHistory"
+            aria-selected="false">
+      سجل زياراتي
+    </button>
+
+  </nav>
+
+
+  <!-- TAB 1: DIGITAL CARD -->
+
+  <section class="va-panel"
+           id="panelQr"
+           role="tabpanel"
+           aria-labelledby="tabQr"
+           data-panel="qr">
+
+    <div class="va-card">
+
+      <h2>بطاقتي الرقمية</h2>
+
+      <p class="va-muted">
+        اعرض رمز QR الخاص بك للمنظّم عند دخول المنطقة أو الخروج منها.
+      </p>
+
+      <div class="va-qr-container">
+
+        <img id="visitorQr"
+             class="va-qr"
+             alt="رمز QR الخاص بالزائر"
+             hidden>
+
+        <p id="qrLoading">
+          جارٍ تحميل بطاقتك الرقمية...
+        </p>
+
       </div>
-    </section>
 
-    <section class="card card-pad" id="visits" aria-labelledby="hTitle">
-      <div class="card-head"><div><h2 id="hTitle" data-i18n="hist.title"></h2><p style="margin:4px 0 0;color:var(--muted);font-size:14px" id="hSub" data-i18n="hist.sub"></p></div></div>
-      <div class="visit-list" id="visitList"></div>
-    </section>
-  </div>
+      <div class="va-actions">
 
-  <div class="qr-modal" id="qrModal" hidden role="dialog" aria-modal="true" aria-labelledby="qrMT">
-    <div class="box">
-      <h2 id="qrMT" style="font-size:20px" data-i18n="card.title"></h2>
-      <img id="qrBig" alt="">
-      <p data-i18n="card.bright"></p>
-      <button type="button" class="btn btn-primary" id="qrClose" data-i18n="card.close"></button>
+        <button type="button"
+                id="expandQr"
+                class="va-btn"
+                disabled>
+          تكبير QR
+        </button>
+
+        <a id="downloadQr"
+           class="va-btn secondary"
+           download="mergab-visitor-qr.png"
+           hidden>
+          حفظ البطاقة
+        </a>
+
+      </div>
+
     </div>
-  </div>
+  </section>
 
-  <div class="acc-grid">
-    <section class="card card-pad" aria-labelledby="pTitle">
-      <h2 id="pTitle" style="font-size:19px;margin-bottom:16px" data-i18n="acc.details"></h2>
-      <form id="profile" style="display:flex;flex-direction:column;gap:14px" novalidate>
-        <label class="field"><span data-i18n="f.fullName"></span><input type="text" name="fullName" required minlength="3" maxlength="50" autocomplete="name"></label>
-        <label class="field"><span data-i18n="f.email"></span><input type="email" name="email" required dir="ltr" autocomplete="email"></label>
-        <label class="field"><span data-i18n="f.phone"></span><input type="tel" name="phoneNumber" required pattern="05[0-9]{8}" dir="ltr" autocomplete="tel"></label>
-        <label class="field"><span data-i18n="f.password"></span><input type="password" name="password" required minlength="6" autocomplete="new-password"><small data-i18n="acc.passConfirm"></small></label>
-        <label class="opt-card"><input type="checkbox" name="showPrayerTimes" class="switch"><span class="ic" data-ic="pray"></span>
-        <span class="txt"><b data-i18n="opt.prayer"></b><small data-i18n="opt.prayerHelp"></small></span></label>
-        <button type="submit" class="btn btn-primary" style="align-self:flex-start" data-i18n="acc.saveChanges"></button>
+
+  <!-- TAB 2: PROFILE -->
+
+  <section class="va-panel"
+           id="panelInfo"
+           role="tabpanel"
+           aria-labelledby="tabInfo"
+           data-panel="info"
+           hidden>
+
+    <div class="va-card">
+
+      <h2 id="visitorGreeting">معلوماتي الشخصية</h2>
+
+      <p class="va-muted">
+        عرض بياناتك وتعديل رقم الجوال وتفضيلاتك.
+      </p>
+
+      <form id="visitorInfoForm" class="va-form">
+
+        <label class="va-field">
+          <span>الاسم الكامل</span>
+          <input id="visitorName"
+                 type="text"
+                 readonly>
+        </label>
+
+        <label class="va-field">
+          <span>البريد الإلكتروني</span>
+          <input id="visitorEmail"
+                 type="email"
+                 readonly>
+        </label>
+
+        <label class="va-field">
+          <span>رقم الجوال</span>
+          <input id="visitorPhone"
+                 type="tel"
+                 required
+                 pattern="05[0-9]{8}"
+                 maxlength="10"
+                 inputmode="numeric">
+        </label>
+
+        <label class="va-field">
+          <span>الجنس</span>
+
+          <select id="visitorGender" required>
+            <option value="MALE">ذكر</option>
+            <option value="FEMALE">أنثى</option>
+          </select>
+        </label>
+
+        <label class="va-check">
+          <input type="checkbox" id="showPrayerTimes">
+          <span>إظهار أوقات الصلاة</span>
+        </label>
+
+        <button type="submit"
+                id="saveVisitor"
+                class="va-btn">
+          حفظ التغييرات
+        </button>
+
+        <p id="visitorMessage"
+           class="va-message"
+           role="status"></p>
+
       </form>
-      <hr style="border:0;border-top:1px solid var(--line);margin:22px 0 16px">
-      <div style="display:flex;flex-wrap:wrap;gap:10px">
-        <button type="button" class="btn btn-ghost" id="logoutBtn" data-i18n="auth.logout"></button>
-        <button type="button" class="btn btn-danger" id="deleteBtn" data-i18n="acc.delete"></button>
-      </div>
-    </section>
 
-    <section class="card card-pad" id="saved" aria-labelledby="sTitle">
-      <div class="card-head"><h2 id="sTitle" data-i18n="acc.saved"></h2><a class="v-link" href="map.html" id="addLink"></a></div>
-      <div id="savedList"></div>
-    </section>
-  </div>
+    </div>
+  </section>
+
+
+  <!-- TAB 3: VISIT HISTORY -->
+
+  <section class="va-panel"
+           id="panelHistory"
+           role="tabpanel"
+           aria-labelledby="tabHistory"
+           data-panel="history"
+           hidden>
+
+    <div class="va-card">
+
+      <h2>سجل زياراتي</h2>
+
+      <p class="va-muted">
+        المناطق التي زرتها وأوقات الدخول والخروج المسجلة.
+      </p>
+
+      <div id="myVisits">
+        جارٍ تحميل سجل الزيارات...
+      </div>
+
+    </div>
+
+  </section>
+
 </main>
 
-<footer id="vFooter"></footer>
 
-<script src="../assets/js/site-config.js"></script>
-<script src="../assets/js/qr.js"></script>
-<script src="../assets/js/mock-server.js"></script>
-<script src="../assets/js/api.js"></script>
-<script src="../assets/js/visitor.js"></script>
+<!-- QR Preview Modal -->
+
+<dialog id="qrDialog" class="va-dialog">
+
+  <h2>بطاقتك الرقمية</h2>
+
+  <img id="visitorQrLarge" alt="رمز QR مكبّر">
+
+  <button type="button"
+          id="closeQr"
+          class="va-btn">
+    إغلاق
+  </button>
+
+</dialog>
+
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+
 <script>
-  const { api, auth, esc, level, zoneName, toast, toDate, fmtTime, fmtDate, isToday } = Mergab;
-  const I = Visitor.icon;
-  const me = auth.require(['VISITOR']);   // الصفحة للزائر فقط
+  document.addEventListener("DOMContentLoaded", () => {
 
-  if (me) {
-    const form = document.getElementById('profile');
-    if (I18n.isAr) form.querySelectorAll('[dir=ltr]').forEach(i => i.style.textAlign = 'right');
-    if (new URLSearchParams(location.search).get('welcome')) document.getElementById('welcome').hidden = false;
-    document.querySelectorAll('[data-ic]').forEach(el => el.innerHTML = Visitor.icon(el.dataset.ic, 22));
-    document.getElementById('hello').textContent = t('acc.hello', { n: me.fullName.split(' ')[0] });
-    document.getElementById('addLink').innerHTML = esc(t('acc.addFromMap')) + ' ' + Visitor.next(16);
+    const session = MergabAuth.requireRole(["VISITOR"]);
+    if (!session) return;
 
-    api.get('/user/me').then(u => {
-      form.fullName.value = u.fullName || '';
-      form.email.value = u.email || '';
-      form.phoneNumber.value = (u.visitor && u.visitor.phoneNumber) || '';
-      form.showPrayerTimes.checked = !!(u.visitor && u.visitor.showPrayerTimes);
+    const $ = id => document.getElementById(id);
+
+    let qrObjectUrl = null;
+    let profileLoaded = false;
+
+
+    // ======================================
+    // ACCOUNT TABS
+    // ======================================
+
+    document.querySelectorAll("[data-tab]").forEach(tab => {
+
+      tab.addEventListener("click", () => {
+
+        const selected = tab.dataset.tab;
+
+        document.querySelectorAll("[data-tab]").forEach(button => {
+          button.setAttribute(
+                  "aria-selected",
+                  String(button.dataset.tab === selected)
+          );
+        });
+
+        document.querySelectorAll("[data-panel]").forEach(panel => {
+          panel.hidden = panel.dataset.panel !== selected;
+        });
+
+      });
+
     });
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      if (!form.checkValidity()) { form.reportValidity(); return; }
-      const body = { fullName: form.fullName.value.trim(), email: form.email.value.trim(), phoneNumber: form.phoneNumber.value.trim(), password: form.password.value, showPrayerTimes: form.showPrayerTimes.checked };
-      try {
-        await api.put('/visitor/update/' + me.id, body);
-        await auth.login(body.email, body.password);   // نحدّث الجلسة
-        form.password.value = '';
-        document.getElementById('hello').textContent = t('acc.hello', { n: body.fullName.split(' ')[0] });
-        Visitor.shell();
-      } catch (err) { /* الرسالة ظهرت */ }
-    });
 
-    document.getElementById('logoutBtn').addEventListener('click', () => auth.logout());
-    document.getElementById('deleteBtn').addEventListener('click', async () => {
-      if (!confirm(t('acc.deleteConfirm'))) return;
-      try { await api.del('/visitor/delete/' + me.id); auth.logout(); } catch (err) {}
-    });
+    // ======================================
+    // AUTHENTICATED API REQUESTS
+    // ======================================
 
-    /* ---------- بطاقة الدخول (GET /visitor/qr-code/{visitorId}) ---------- */
-    const logo = document.getElementById('cardLogo');
-    logo.src = Mergab.ROOT + 'assets/img/logo-white.png';
-    document.getElementById('cardName').textContent = me.fullName;
-    document.getElementById('dlBtn').innerHTML = I('download', 18) + ' ' + esc(t('card.download'));
-    document.getElementById('fullBtn').innerHTML = I('expand', 18) + ' ' + esc(t('card.full'));
-    let qrUrl = null;
-    api.image('/visitor/qr-code/' + me.id).then(url => {
-      qrUrl = url;
-      document.getElementById('qrBox').innerHTML = `<img src="${url}" alt="${esc(t('card.title'))}">`;
-      document.getElementById('dlBtn').href = url;
-      document.getElementById('qrBig').src = url;
-    }).catch(() => { document.getElementById('qrBox').innerHTML = `<span class="empty">${esc(t('card.err'))}</span>`; });
+    async function request(path, options = {}) {
 
-    const modal = document.getElementById('qrModal');
-    const openQr = () => { if (qrUrl) { modal.hidden = false; document.getElementById('qrClose').focus(); } };
-    document.getElementById('qrBox').addEventListener('click', openQr);
-    document.getElementById('fullBtn').addEventListener('click', openQr);
-    document.getElementById('qrClose').addEventListener('click', () => { modal.hidden = true; });
-    modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.hidden = true; });
+      const isQr = path === "/visitor/my-qr-code";
 
-    /* ---------- زياراتي (GET /zone-visit/history/{visitorId}) ---------- */
-    function minutesBetween(a, b) { return Math.max(0, Math.round(((b ? toDate(b) : new Date()) - toDate(a)) / 60000)); }
-    function durText(m) { const h = Math.floor(m / 60); return h ? t('hist.durH', { h, m: m % 60 }) : t('hist.dur', { m }); }
-    async function renderVisits() {
-      const [list, zones] = await Promise.all([api.get('/zone-visit/history/' + me.id), api.get('/zone/get')]);
-      const visits = (list || []).slice().sort((a, b) => toDate(b.checkInTime) - toDate(a.checkInTime));
-      const active = visits.find(v => !v.checkOutTime);
-      const st = document.getElementById('entryStatus');
-      st.classList.toggle('inside', !!active);
-      st.querySelector('span').innerHTML = active
-        ? `${esc(t('card.inside', { z: zoneName(active.zoneName) }))}<small>${esc(t('card.since', { t: fmtTime(active.checkInTime) }))}</small>`
-        : esc(t('card.outside'));
-      const total = visits.reduce((s, v) => s + minutesBetween(v.checkInTime, v.checkOutTime), 0);
-      document.getElementById('hSub').textContent = visits.length ? t('hist.total', { n: visits.length, m: total }) : t('hist.sub');
-      let lastDay = '';
-      document.getElementById('visitList').innerHTML = visits.length ? visits.map(v => {
-        const z = zones.find(x => x.id === v.zoneId) || { name: v.zoneName };
-        const day = isToday(v.checkInTime) ? t('today') : fmtDate(v.checkInTime);
-        const head = day !== lastDay ? `<div class="visit-day">${esc(day)}</div>` : '';
-        lastDay = day;
-        return head + `<div class="visit-row"><span class="thumb" style="${Visitor.zoneArt(z)}" aria-hidden="true"></span>
-          <span class="meta"><b>${esc(zoneName(v.zoneName))}</b>
-          <small>${esc(t('hist.in'))} ${fmtTime(v.checkInTime)}${v.checkOutTime ? ' · ' + esc(t('hist.out')) + ' ' + fmtTime(v.checkOutTime) : ''}${v.manualCheckOut ? ' · ' + esc(t('hist.manual')) : ''}</small></span>
-          ${v.checkOutTime ? `<span class="dur">${esc(durText(minutesBetween(v.checkInTime, v.checkOutTime)))}</span>` : `<span class="live">${esc(t('hist.still'))}</span>`}</div>`;
-      }).join('') : `<div class="empty">${esc(t('hist.empty'))}</div>`;
-      return active;
+      const response = await fetch("/api/v1" + path, {
+
+        ...options,
+
+        headers: {
+          Authorization: session.token,
+
+          // QR endpoint returns PNG, not JSON.
+          Accept: isQr ? "image/png" : "application/json",
+
+          ...(options.body
+                  ? { "Content-Type": "application/json" }
+                  : {}),
+
+          ...(options.headers || {})
+        },
+
+        cache: "no-store"
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("انتهت صلاحية الدخول أو ليس لديك صلاحية.");
+      }
+
+      if (!response.ok) {
+        throw new Error(
+                "تعذر إكمال العملية. رمز الخطأ: " + response.status
+        );
+      }
+
+      return response;
     }
-    renderVisits();
 
-    // وضع تجريبي فقط: زر يحاكي مسح موظف البوابة عشان تشوفين البطاقة والسجل يتغيرون
-    if (Mergab.MODE === 'mock' && window.MockServer && MockServer.demoScan) {
-      const demo = document.getElementById('demoBtn');
-      demo.hidden = false;
-      demo.textContent = t('card.demo');
-      demo.addEventListener('click', async () => {
-        const zones = await api.get('/zone/get');
-        const pick = zones.filter(z => !/gate/i.test(z.name))[Math.floor(Math.random() * 6)] || zones[0];
-        try {
-          const r = await MockServer.demoScan(me.id, pick.id);
-          toast(t(r.out ? 'card.demoOut' : 'card.demoIn', { z: zoneName(r.zone) }), 'success');
-          renderVisits();
-        } catch (err) { toast(err.message, 'error'); }
+
+    // ======================================
+    // LOAD PROFILE
+    // ======================================
+
+    async function loadProfile() {
+
+      try {
+
+        const response = await request("/user/my-account");
+        const user = await response.json();
+
+        $("visitorGreeting").textContent =
+                "أهلًا، " + (user.fullName || "زائر مِرقاب");
+
+        $("visitorName").value = user.fullName || "";
+        $("visitorEmail").value = user.email || "";
+
+        $("visitorPhone").value =
+                user.visitor?.phoneNumber || "";
+
+        $("visitorGender").value =
+                user.visitor?.gender || "MALE";
+
+        $("showPrayerTimes").checked =
+                user.visitor?.showPrayerTimes === true;
+
+        profileLoaded = Boolean(user.visitor);
+
+        if (!profileLoaded) {
+          throw new Error("لم يتم العثور على بيانات الزائر.");
+        }
+
+      } catch (error) {
+
+        $("visitorMessage").textContent = error.message;
+        console.error("Visitor profile:", error);
+
+      }
+    }
+
+
+    // ======================================
+    // LOAD VISITOR QR
+    // ======================================
+
+    async function loadQr() {
+
+      try {
+
+        const response = await request(
+                "/visitor/my-qr-code"
+        );
+
+        const blob = await response.blob();
+
+        if (!blob.size || !blob.type.includes("image/png")) {
+          throw new Error("استجابة QR غير صالحة.");
+        }
+
+        qrObjectUrl = URL.createObjectURL(blob);
+
+        $("visitorQr").src = qrObjectUrl;
+        $("visitorQrLarge").src = qrObjectUrl;
+
+        $("visitorQr").hidden = false;
+        $("qrLoading").hidden = true;
+
+        $("expandQr").disabled = false;
+
+        $("downloadQr").href = qrObjectUrl;
+        $("downloadQr").hidden = false;
+
+      } catch (error) {
+
+        $("visitorQr").hidden = true;
+
+        $("qrLoading").hidden = false;
+        $("qrLoading").textContent =
+                "تعذر تحميل QR: " + error.message;
+
+        console.error("Visitor QR:", error);
+
+      }
+    }
+
+
+    // ======================================
+    // QR ACTIONS
+    // ======================================
+
+    $("expandQr").addEventListener("click", () => {
+
+      if (qrObjectUrl) {
+        $("qrDialog").showModal();
+      }
+
+    });
+
+    $("closeQr").addEventListener("click", () => {
+      $("qrDialog").close();
+    });
+
+
+    // ======================================
+    // UPDATE VISITOR INFO
+    // ======================================
+
+    $("visitorInfoForm").addEventListener(
+            "submit",
+            async event => {
+
+              event.preventDefault();
+
+              if (!profileLoaded) return;
+
+              const button = $("saveVisitor");
+
+              button.disabled = true;
+
+              $("visitorMessage").textContent = "جارٍ الحفظ...";
+
+              try {
+
+                await request("/visitor/update-my-info", {
+
+                  method: "PUT",
+
+                  body: JSON.stringify({
+
+                    phoneNumber: $("visitorPhone").value.trim(),
+
+                    gender: $("visitorGender").value,
+
+                    showPrayerTimes:
+                    $("showPrayerTimes").checked
+                  })
+                });
+
+                $("visitorMessage").textContent =
+                        "تم حفظ التغييرات بنجاح.";
+
+              } catch (error) {
+
+                $("visitorMessage").textContent = error.message;
+
+              } finally {
+
+                button.disabled = false;
+
+              }
+            }
+    );
+
+
+    // ======================================
+    // VISIT HISTORY
+    // ======================================
+
+    const escapeHtml = value =>
+            String(value ?? "").replace(/[&<>"']/g, char => ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;"
+            }[char]));
+
+
+    function formatDate(value) {
+
+      if (!value) return "—";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) return "—";
+
+      return date.toLocaleString("ar-SA", {
+        dateStyle: "medium",
+        timeStyle: "short"
       });
     }
 
-    async function renderSaved() {
-      const zones = await api.get('/zone/get');
-      const list = Visitor.saved.list().map(n => zones.find(z => z.name === n)).filter(Boolean);
-      document.getElementById('savedList').innerHTML = list.length ? list.map(z => {
-        const lv = level(z.initialVisitors, z.capacity);
-        return `<div class="saved"><span class="thumb" style="${Visitor.zoneArt(z)}" aria-hidden="true"></span>
-          <span class="meta"><b>${esc(zoneName(z))}</b><span class="badge" style="background:${lv.soft};color:#14211C">${esc(lv.label)} · <span dir="ltr">${lv.percent}%</span></span></span>
-          <a class="btn btn-ghost btn-sm" href="map.html?zone=${encodeURIComponent(z.name)}">${esc(t('onMap'))}</a>
-          <button type="button" class="icon-btn danger" data-rm="${esc(z.name)}" aria-label="${esc(t('acc.remove', { z: zoneName(z) }))}">${I('heart', 18, '#C0392B', true)}</button></div>`;
-      }).join('') : `<div class="empty">${t('acc.savedEmpty')}</div>`;
+
+    async function loadHistory() {
+
+      const container = $("myVisits");
+
+      try {
+
+        const response = await request(
+                "/zone-visit/my-history"
+        );
+
+        const data = await response.json();
+
+        const visits = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                        ? data.data
+                        : [];
+
+        if (!visits.length) {
+
+          container.textContent =
+                  "ما عندك زيارات مسجلة حتى الآن.";
+
+          return;
+        }
+
+        visits.sort((a, b) =>
+                new Date(b.checkInTime) -
+                new Date(a.checkInTime)
+        );
+
+        container.innerHTML = visits.map(visit => `
+
+                <article class="va-visit">
+
+                    <strong>
+                        ${escapeHtml(visit.zoneName || "منطقة")}
+                    </strong>
+
+                    <p>
+                        الدخول:
+                        ${formatDate(visit.checkInTime)}
+                    </p>
+
+                    <p>
+                        الخروج:
+                        ${visit.checkOutTime
+                ? formatDate(visit.checkOutTime)
+                : "ما زال داخل المنطقة"}
+                    </p>
+
+                    <span class="va-status">
+                        ${visit.checkOutTime
+                ? "زيارة مكتملة"
+                : "زيارة نشطة"}
+                    </span>
+
+                </article>
+
+            `).join("");
+
+      } catch (error) {
+
+        console.error("Visit history:", error);
+
+        container.textContent =
+                "تعذر تحميل سجل الزيارات.";
+
+      }
     }
-    document.getElementById('savedList').addEventListener('click', e => {
-      const b = e.target.closest('[data-rm]');
-      if (b) { Visitor.saved.toggle(b.dataset.rm); toast(t('map.removedToast'), 'success'); renderSaved(); }
+
+
+    // ======================================
+    // INITIALIZE
+    // ======================================
+
+    loadProfile();
+    loadQr();
+    loadHistory();
+
+
+    window.addEventListener("beforeunload", () => {
+
+      if (qrObjectUrl) {
+        URL.revokeObjectURL(qrObjectUrl);
+      }
+
     });
-    document.getElementById('savedList').innerHTML = `<div class="empty">${esc(t('loading'))}</div>`;
-    renderSaved();
-  }
+
+  });
 </script>
+
 </body>
 </html>

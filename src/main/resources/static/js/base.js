@@ -170,6 +170,7 @@ Mergab.layoutTranslations = {
         dashboard: 'لوحة التحكم',
         welcome: 'أهلًا بك ',
         logout: 'تسجيل الخروج',
+        navVisit: 'دليل الزيارة',
 
     },
     en: {
@@ -183,6 +184,7 @@ Mergab.layoutTranslations = {
         dashboard: 'Dashboard',
         welcome: 'Welcome ',
         logout: 'Log out',
+        navVisit: 'Visit guide',
     }
 };
 

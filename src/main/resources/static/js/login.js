@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const allowedPrefix = {
                 ADMIN: "/admin",
                 ORGANIZER: "/organizer",
-                VISITOR: "/visitor"
+                VISITOR: "/"
             }[session.role];
 
             const destination =

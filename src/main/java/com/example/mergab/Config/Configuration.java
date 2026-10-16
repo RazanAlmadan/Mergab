@@ -73,6 +73,9 @@ public class Configuration {
                                 "/organizer/simulations",
                                 "/organizer/reports",
                                 "/organizer/check-in",
+                                "/visitor/visit",
+                                "/visitor/account",
+                                "/visitor",
 
                                 // Static resources
                                 "/css/**",
@@ -163,9 +166,7 @@ public class Configuration {
                                 "/api/v1/visitor/my-qr-code",
                                 "/api/v1/prayer/my-alert",
                                 "/api/v1/prayer/my-alert/seen/{prayer}",
-                                "/visitor",
-                                "/visitor/visit",
-                                "/visitor/account"
+                                "/api/v1/zone-visit/my-history"
                         ).hasAuthority("VISITOR")
 
                         .requestMatchers(
