@@ -466,3 +466,43 @@
         transition: none;
     }
 }
+
+.auth-page [hidden] {
+    display: none !important;
+}
+
+.auth-forgot-link {
+    display: inline-block;
+    margin: 12px 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: #07574f;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-recovery h2 {
+    color: #103a38;
+    font-size: 28px;
+    margin: 0 0 10px;
+}
+
+.auth-recovery > p {
+    color: #788581;
+    line-height: 1.9;
+    margin-bottom: 24px;
+}
+
+.auth-recovery-notice {
+    padding: 14px;
+    margin: 18px 0;
+    background: #eaf5ee;
+    color: #07574f;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.8;
+}

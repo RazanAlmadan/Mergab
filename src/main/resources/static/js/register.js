@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const phoneInput = document.getElementById("phoneNumber");
     const passwordInput = document.getElementById("password");
     const prayerInput = document.getElementById("showPrayerTimes");
+    const privacyInput = document.getElementById("privacyAcknowledged");
 
     const registerButton = document.getElementById("registerButton");
     const errorBox = document.getElementById("registerError");
@@ -60,7 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
             serverError: "تعذر إنشاء الحساب. يرجى المحاولة مرة أخرى.",
             registering: "جارٍ إنشاء الحساب...",
             showPassword: "إظهار كلمة المرور",
-            hidePassword: "إخفاء كلمة المرور"
+            hidePassword: "إخفاء كلمة المرور",
+            privacyNoticeText: "اطلعت وفهمت كيفية معالجة بياناتي حسب",
+            privacyNoticeLink: "سياسة الخصوصية",
+            privacyRequired: "يرجى الاطلاع على سياسة الخصوصية وتأكيد الإقرار.",
         },
         en: {
             pageTitle: "Create Account | Mergab",
@@ -103,7 +107,10 @@ document.addEventListener("DOMContentLoaded", () => {
             serverError: "Unable to create your account. Please try again.",
             registering: "Creating your account...",
             showPassword: "Show password",
-            hidePassword: "Hide password"
+            hidePassword: "Hide password",
+            privacyNoticeText: "I have read and understood how my data is processed under the",
+            privacyNoticeLink: "Privacy Policy",
+            privacyRequired: "Please read and acknowledge the Privacy Policy.",
         }
     };
 
@@ -206,6 +213,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (password.length < 6) {
             return t.invalidPassword;
         }
+        if (!privacyInput.checked) {
+            return t.privacyRequired;
+        }
 
         return null;
     }
@@ -276,7 +286,8 @@ document.addEventListener("DOMContentLoaded", () => {
             gender: form.querySelector(
                 'input[name="gender"]:checked'
             ).value,
-            showPrayerTimes: prayerInput.checked
+            showPrayerTimes: prayerInput.checked,
+            privacyAcknowledged: privacyInput.checked
         };
 
         setLoading(true);

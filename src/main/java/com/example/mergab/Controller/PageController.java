@@ -23,6 +23,11 @@ public class PageController {
         return "visitor/register";
     }
 
+    @GetMapping("/privacy")
+    public String privacy() {
+        return "privacy";
+    }
+
     @GetMapping("/visitor")
     public String visitorHome() {
         return "redirect:/";

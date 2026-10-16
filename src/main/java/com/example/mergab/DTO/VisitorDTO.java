@@ -1,9 +1,6 @@
 package com.example.mergab.DTO;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,4 +31,8 @@ public class VisitorDTO {
     private String gender;
 
     private Boolean showPrayerTimes = false;
+
+    @NotNull(message = "Privacy acknowledgment is required")
+    @AssertTrue(message = "Privacy policy must be acknowledged")
+    private Boolean privacyAcknowledged;
 }

@@ -3,6 +3,9 @@ package com.example.mergab.Repository;
 
 import com.example.mergab.Model.ZoneVisit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,4 +29,8 @@ public interface ZoneVisitRepository extends JpaRepository<ZoneVisit, Integer> {
     boolean existsByZone_Id(Integer zoneId);
 
     List<ZoneVisit> findByZone_IdAndCheckOutTimeIsNull(Integer zoneId);
+
+    @Modifying
+    @Query("DELETE FROM ZoneVisit z WHERE z.visitor.id = :visitorId")
+    int deleteVisitsByVisitorId(@Param("visitorId") Integer visitorId);
 }

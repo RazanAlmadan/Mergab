@@ -60,6 +60,7 @@ public class Configuration {
                                 "/",
                                 "/login",
                                 "/register",
+                                "/privacy",
                                 "/forbidden",
                                 "/visitor/map",
                                 "/visitor/events",
@@ -76,6 +77,7 @@ public class Configuration {
                                 "/visitor/visit",
                                 "/visitor/account",
                                 "/visitor",
+
 
                                 // Static resources
                                 "/css/**",

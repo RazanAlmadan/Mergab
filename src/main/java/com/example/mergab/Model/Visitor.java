@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -31,6 +32,12 @@ public class Visitor {
     // الزائر يختار يشوف أوقات الصلاة أو لا
     @Column(columnDefinition = "boolean not null default false")
     private Boolean showPrayerTimes = false;
+
+    @Column(length = 20)
+    private String privacyNoticeVersion;
+
+    @Column
+    private LocalDateTime privacyNoticeAcknowledgedAt;
 
     @OneToOne
     @MapsId

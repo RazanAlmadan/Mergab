@@ -24,6 +24,8 @@ public class UserService {
     private final SimulationRepository simulationRepository;
     private final ZoneVisitRepository zoneVisitRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PrayerAlertLogRepository prayerAlertLogRepository;
+    private final PasswordResetCodeRepository passwordResetCodeRepository;
 
 
     public List<User> getAllUsers() {
@@ -85,12 +87,16 @@ public class UserService {
 
         if ("VISITOR".equals(user.getRole())) {
 
-            // Prevent deleting a visitor with zone visit history
-            if (zoneVisitRepository.existsByVisitor_Id(id)) {
-                throw new ApiException("Cannot delete a visitor with zone visit history");
-            }
+            // Remove personal visit history
+            zoneVisitRepository.deleteVisitsByVisitorId(id);
 
-            // Delete visitor profile before deleting the user account
+            // Remove prayer alert history
+            prayerAlertLogRepository.deleteLogsByVisitorId(id);
+
+            // Remove password reset records
+            passwordResetCodeRepository.deleteByUser_Id(id);
+
+            // Remove visitor profile
             user.setVisitor(null);
             visitorRepository.deleteById(id);
             visitorRepository.flush();

@@ -41,6 +41,36 @@ input {
     white-space: nowrap;
     border: 0;
 }
+
+/* ===== Shared Buttons ===== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .2s, transform .2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: var(--green-900);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--green-500);
+    color: #fff;
+}
 /* ===== Shared Navbar ===== */
 
 .home-container {

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +50,13 @@ public class VisitorService {
         visitor.setUser(user);
 
         visitor.setShowPrayerTimes(Boolean.TRUE.equals(dto.getShowPrayerTimes()));
+
+        if (!Boolean.TRUE.equals(dto.getPrivacyAcknowledged())) {
+            throw new ApiException("Privacy acknowledgment is required");
+        }
+
+        visitor.setPrivacyNoticeVersion("1.0");
+        visitor.setPrivacyNoticeAcknowledgedAt(LocalDateTime.now());
 
 
         user.setVisitor(visitor);

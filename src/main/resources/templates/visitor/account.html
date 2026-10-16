@@ -443,6 +443,13 @@
           حفظ التغييرات
         </button>
 
+        <button type="button"
+                id="deleteMyAccount"
+                class="va-btn"
+                style="background:#B42318;margin-top:16px">
+          حذف حسابي نهائيًا
+        </button>
+
         <p id="visitorMessage"
            class="va-message"
            role="status"></p>
@@ -834,6 +841,32 @@
 
       }
     }
+
+    $("deleteMyAccount").addEventListener("click", async () => {
+
+      const confirmed = confirm(
+              "هل أنت متأكد من حذف حسابك وبياناتك وسجل زياراتك نهائيًا؟"
+      );
+
+      if (!confirmed) return;
+
+      const button = $("deleteMyAccount");
+      button.disabled = true;
+
+      try {
+        await request("/user/delete-my-account", {
+          method: "DELETE"
+        });
+
+        MergabAuth.logout();
+
+      } catch (error) {
+        $("visitorMessage").textContent =
+                "تعذر حذف الحساب: " + error.message;
+
+        button.disabled = false;
+      }
+    });
 
 
     // ======================================

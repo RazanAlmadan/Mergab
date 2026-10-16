@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>سياسة الخصوصية | مِرقاب</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <script defer src="/js/base.js"></script>
+
+    <style>
+        .privacy-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 24px;
+            padding: 12px 24px;
+            background: #0E5946;
+            color: #FFFFFF !important;
+            border-radius: 12px;
+            text-decoration: none !important;
+            font-weight: 700;
+            transition: background 0.2s ease;
+        }
+
+        .privacy-back:hover {
+            background: #14765B;
+            color: #FFFFFF;
+        }
+        .privacy-main {
+            max-width: 850px;
+            margin: 45px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 18px;
+            line-height: 2;
+        }
+        .privacy-main h1,
+        .privacy-main h2 {
+            color: #0E5946;
+        }
+        .privacy-main h2 {
+            font-size: 20px;
+            margin-top: 25px;
+        }
+        .privacy-main p {
+            color: #52665C;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{fragments/layout :: navbar}"></header>
+
+<main class="privacy-main">
+    <h1>سياسة الخصوصية في مِرقاب</h1>
+    <p>الإصدار 1.0 — آخر تحديث: 17 أكتوبر 2026</p>
+
+    <p>
+        مِرقاب منصة تقنية تهدف إلى تحسين تجربة زوار إكسبو
+        وإدارة حركة الحشود. نوضح هنا كيفية التعامل مع
+        البيانات الشخصية للمستخدمين.
+    </p>
+
+    <h2>1. البيانات التي نجمعها</h2>
+    <p>
+        الاسم الكامل، البريد الإلكتروني، رقم الجوال،
+        الجنس، بيانات الحساب، تفضيل تنبيهات الصلاة،
+        وسجلات الدخول والخروج من مناطق المعرض.
+    </p>
+
+    <h2>2. أغراض استخدام البيانات</h2>
+    <p>
+        إنشاء وإدارة الحسابات، إصدار بطاقات QR،
+        تسجيل الدخول والخروج، حساب نسب الإشغال،
+        وتحسين تجربة التنقل والسلامة داخل المعرض.
+        وتُستخدم تفضيلات الصلاة لتقديم التنبيهات
+        الاختيارية عند تفعيلها.
+    </p>
+
+    <h2>3. حماية البيانات</h2>
+    <p>
+        يستخدم مِرقاب ضوابط للمصادقة وتحديد الصلاحيات،
+        وتُخزّن كلمات المرور بصورة مشفّرة تجزئيًا.
+        يقتصر الوصول إلى البيانات على الوظائف
+        والصلاحيات المحددة داخل النظام.
+    </p>
+
+    <h2>4. مشاركة البيانات</h2>
+    <p>
+        تُستخدم البيانات لتشغيل وظائف مِرقاب،
+        وقد تتضمن بعض الوظائف خدمات خارجية،
+        مثل خدمات إرسال البريد الإلكتروني.
+        يجب تحديد أي مشاركة إضافية أو نقل للبيانات
+        ضمن السياسة قبل التشغيل الفعلي.
+    </p>
+
+    <h2>5. الاحتفاظ بالبيانات</h2>
+    <p>
+        يُحتفظ بالبيانات بالقدر اللازم لتحقيق
+        أغراض معالجتها أو للوفاء بالالتزامات النظامية.
+        وتُحدّد مدد الاحتفاظ وآليات الإتلاف وفق
+        سياسة معتمدة قبل تشغيل النظام فعليًا.
+    </p>
+
+    <h2>6. حقوق المستخدم</h2>
+    <p>
+        يحق لصاحب البيانات طلب الاطلاع عليها،
+        والوصول إليها، وتصحيحها، وطلب إتلافها
+        وفق الشروط النظامية، وسحب الموافقة
+        عندما تكون أساسًا للمعالجة.
+    </p>
+
+    <h2>7. التواصل بشأن الخصوصية</h2>
+    <p>
+        الجهة المسؤولة: [OMNIX TEAM]
+    </p>
+    <p>
+        البريد الإلكتروني: [mergab.platform@gmail.com]
+    </p>
+
+    <a href="/register" class="privacy-back">
+        العودة إلى التسجيل
+    </a>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>
