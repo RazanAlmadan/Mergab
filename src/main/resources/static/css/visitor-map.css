@@ -316,3 +316,16 @@
 .map-page .mqm-ime-label {
     display: none !important;
 }
+
+.map-location-tools {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 0;
+}
+
+#myLocationStatus {
+    font-size: 13px;
+    color: #52665b;
+}

@@ -483,6 +483,189 @@
         return true;
     }
 
+
+    // ======================================
+    // ACTIVE WALKWAYS + FACILITY ACCESS
+    // ======================================
+
+    async function loadActiveNetwork(zones) {
+        const facilities = await getList("/facility/get");
+
+        const walkGroups = await Promise.all(
+            zones.filter(zone => zone.id != null).map(async zone => {
+                try {
+                    const paths = await getList(
+                        `/zone-walk-path/get-active-by-zone/${zone.id}`
+                    );
+
+                    return paths.map(path => ({
+                        ...path,
+                        zoneId: zone.id
+                    }));
+                } catch (error) {
+                    console.warn("Zone walk paths:", zone.id, error);
+                    return [];
+                }
+            })
+        );
+
+        const accessGroups = await Promise.all(
+            facilities.filter(f => f.id != null).map(async facility => {
+                try {
+                    const paths = await getList(
+                        `/facility-access-path/get-active-by-facility/${facility.id}`
+                    );
+                    return paths.map(path => ({
+                        ...path,
+                        facilityId: facility.id
+                    }));
+                } catch (error) {
+                    console.warn("Facility access paths:", facility.id, error);
+                    return [];
+                }
+            })
+        );
+
+        return {
+            facilities,
+            walkPaths: walkGroups.flat(),
+            accessPaths: accessGroups.flat()
+        };
+    }
+
+    function drawActiveNetwork(target, network) {
+        const root = typeof target === "string"
+            ? document.querySelector(target) : target;
+
+        const svg = root?.querySelector(".mqm-isvg");
+        if (!svg) return;
+
+        svg.querySelector("#mergabActiveNetwork")?.remove();
+
+        const layer = svgElement(svg, "g", {
+            id: "mergabActiveNetwork",
+            "pointer-events": "none"
+        });
+
+        function drawRoute(value, color, direction, title) {
+            const points = parsePoints(value);
+            if (points.length < 2) return;
+
+            const line = svgElement(layer, "polyline", {
+                points: points.map(p => p.join(",")).join(" "),
+                fill: "none",
+                stroke: color,
+                "stroke-width": 0.65,
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round",
+                "pointer-events": "none"
+            });
+
+            svgElement(line, "title", {}).textContent = title;
+
+            let longest = null;
+            let maxLength = 0;
+
+            for (let i = 1; i < points.length; i++) {
+                const a = points[i - 1];
+                const b = points[i];
+
+                const length = Math.hypot(
+                    b[0] - a[0],
+                    b[1] - a[1]
+                );
+
+                if (length > maxLength) {
+                    longest = [a, b];
+                    maxLength = length;
+                }
+            }
+
+            if (!longest || maxLength < 1.5) return;
+
+            const [a, b] = longest;
+
+            const baseAngle = Math.atan2(
+                b[1] - a[1],
+                b[0] - a[0]
+            ) * 180 / Math.PI;
+
+            function arrow(at, reverse = false) {
+                const x = a[0] + (b[0] - a[0]) * at;
+                const y = a[1] + (b[1] - a[1]) * at;
+
+                svgElement(layer, "polygon", {
+                    points: "0,0 -1.15,0.5 -1.15,-0.5",
+                    transform:
+                        `translate(${x},${y}) rotate(${baseAngle + (reverse ? 180 : 0)})`,
+                    fill: color,
+                    stroke: "white",
+                    "stroke-width": 0.12
+                });
+            }
+
+            if (
+                direction === "REVERSE" ||
+                direction === "FROM_FACILITY"
+            ) {
+                arrow(0.5, true);
+            } else if (direction === "BOTH") {
+                arrow(0.32);
+                arrow(0.68, true);
+            } else {
+                arrow(0.5);
+            }
+        }
+
+        // Blue: internal walking paths
+        for (const path of network.walkPaths) {
+            drawRoute(
+                path.pathPoints,
+                "#247DB6",
+                path.direction,
+                path.name || "ممر داخلي"
+            );
+        }
+
+        // Orange: facility access connections
+        for (const path of network.accessPaths) {
+            drawRoute(
+                path.pathPoints,
+                "#D28B24",
+                path.direction,
+                "وصلة مرفق"
+            );
+        }
+        // Homepage already renders its own facility icons
+        if (root.id === "homeExpoMap") return;
+
+        // Green: facility locations
+        for (const facility of network.facilities) {
+            if (facility.mapX == null || facility.mapY == null) {
+                continue;
+            }
+
+            const x = Number(facility.mapX);
+            const y = Number(facility.mapY);
+
+            if (!Number.isFinite(x) || !Number.isFinite(y)) {
+                continue;
+            }
+
+            const pin = svgElement(layer, "circle", {
+                cx: x,
+                cy: y,
+                r: 0.95,
+                fill: "#0F614B",
+                stroke: "white",
+                "stroke-width": 0.3
+            });
+
+            svgElement(pin, "title", {}).textContent =
+                facility.name || "مرفق";
+        }
+    }
+
     // ======================================
     // SHARED LIVE MAP
     // ======================================
@@ -522,6 +705,11 @@
         let busy = false;
 
         let savedConnections = [];
+        let savedNetwork = {
+            facilities: [],
+            walkPaths: [],
+            accessPaths: []
+        };
 
         function showMessage(message) {
 
@@ -581,6 +769,15 @@
 
                     console.warn(
                         "Unable to refresh zone connections:",
+                        error
+                    );
+                }
+
+                try {
+                    savedNetwork = await loadActiveNetwork(zones);
+                } catch (error) {
+                    console.warn(
+                        "Unable to refresh active network:",
                         error
                     );
                 }
@@ -703,6 +900,7 @@
                         zones,
                         savedConnections
                     );
+                    drawActiveNetwork(element, savedNetwork);
 
                     if (options.hideLocation) {
 
@@ -723,7 +921,8 @@
                     options.onData(
                         zones,
                         savedConnections,
-                        instance
+                        instance,
+                        savedNetwork
                     );
                 }
 

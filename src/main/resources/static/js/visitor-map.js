@@ -163,6 +163,13 @@
 
     let ZONES = [];
     let EVENTS = [];
+    let ROUTE_NETWORK = {
+        facilities: [],
+        walkPaths: [],
+        accessPaths: []
+    };
+
+    let ZONE_CONNECTIONS = [];
     let selectedId = null;
     let controller = null;
     let picked = new Set();
@@ -422,12 +429,23 @@
 
     function drawRoute(targetId, startId) {
         const map = currentMap();
-
         if (!map) return null;
 
-        const from = startId || $('startSel').value;
+        clearFacilityWalkingRoute();
 
+        const from = startId || $('startSel').value;
         if (!from) return null;
+
+        if (
+            myLocationPoint &&
+            String(from) === $('startSel').value &&
+            String(targetId) !== String(from)
+        ) {
+            return showInterZoneRoute(targetId);
+        }
+
+        activeZoneRouteId = null;
+        $('map').querySelector('#visitorInterZoneRoute')?.remove();
 
         map.setStart(String(from));
         map.select(String(targetId));
@@ -638,8 +656,17 @@
 
     /* ---------------- Live Map Data ---------------- */
 
-    function onData(zones) {
+    function onData(zones, connections, mapInstance, network) {
         ZONES = zones;
+        ZONE_CONNECTIONS = Array.isArray(connections)
+            ? connections
+            : [];
+
+        ROUTE_NETWORK = network || {
+            facilities: [],
+            walkPaths: [],
+            accessPaths: []
+        };
 
         if (selectedId && !byId(selectedId)) {
             selectedId = null;
@@ -649,9 +676,19 @@
             ? t('loaded')
             : t('empty');
 
+        if (activeZoneRouteId && myLocationPoint) {
+            showInterZoneRoute(activeZoneRouteId);
+        }
+
         renderLayers();
         renderCrowd();
         renderPickers();
+        drawMyLocation();
+        renderFacilityTargets();
+
+        if (activeFacilityId) {
+            showFacilityWalkingRoute(activeFacilityId);
+        }
         renderSelected();
         renderSuggestions();
 
@@ -661,6 +698,166 @@
     }
 
     /* ---------------- Click Events ---------------- */
+
+    function mapFromGps(latitude, longitude) {
+        const anchors = ROUTE_NETWORK.facilities.filter(f =>
+            [f.latitude, f.longitude, f.mapX, f.mapY].every(v =>
+                v != null && Number.isFinite(Number(v))
+            )
+        );
+
+        if (anchors.length < 3) return null;
+
+        const lat0 = Number(anchors[0].latitude);
+        const lon0 = Number(anchors[0].longitude);
+
+        const geo = (lat, lon) => [
+            (Number(lon) - lon0) * 111320 *
+            Math.cos(lat0 * Math.PI / 180),
+            (Number(lat) - lat0) * 111320
+        ];
+
+        const pts = anchors.map(f => ({
+            geo: geo(f.latitude, f.longitude),
+            map: [Number(f.mapX), Number(f.mapY)]
+        }));
+
+        let triangle = null;
+        let bestArea = 0;
+
+        for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+                for (let k = j + 1; k < pts.length; k++) {
+                    const a = pts[i].geo;
+                    const b = pts[j].geo;
+                    const c = pts[k].geo;
+
+                    const area = Math.abs(
+                        (b[0] - a[0]) * (c[1] - a[1]) -
+                        (b[1] - a[1]) * (c[0] - a[0])
+                    );
+
+                    if (area > bestArea) {
+                        bestArea = area;
+                        triangle = [pts[i], pts[j], pts[k]];
+                    }
+                }
+            }
+        }
+
+        if (!triangle || bestArea < 100) return null;
+
+        const [a, b, c] = triangle;
+
+        const project = p => {
+            const dx = b.geo[0] - a.geo[0];
+            const dy = b.geo[1] - a.geo[1];
+            const ex = c.geo[0] - a.geo[0];
+            const ey = c.geo[1] - a.geo[1];
+            const px = p[0] - a.geo[0];
+            const py = p[1] - a.geo[1];
+            const den = dx * ey - dy * ex;
+
+            const v = (px * ey - py * ex) / den;
+            const w = (dx * py - dy * px) / den;
+
+            return [
+                a.map[0] * (1 - v - w) + b.map[0] * v + c.map[0] * w,
+                a.map[1] * (1 - v - w) + b.map[1] * v + c.map[1] * w
+            ];
+        };
+
+        if (pts.some(p =>
+            Math.hypot(
+                project(p.geo)[0] - p.map[0],
+                project(p.geo)[1] - p.map[1]
+            ) > 1.5
+        )) return null;
+
+        const point = project(geo(latitude, longitude));
+        return point.every(Number.isFinite) ? point : null;
+    }
+
+    $('gpsMyLocation').addEventListener('click', () => {
+        const status = $('myLocationStatus');
+
+        if (!navigator.geolocation || !window.isSecureContext) {
+            status.textContent =
+                'GPS يحتاج HTTPS أو localhost. استخدمي التحديد اليدوي.';
+            return;
+        }
+
+        status.textContent =
+            'جارٍ محاولة تحديد الموقع... ويمكنك التحديد يدويًا.';
+
+        navigator.geolocation.getCurrentPosition(position => {
+            if (position.coords.accuracy > 50) {
+                status.textContent =
+                    'دقة GPS غير كافية. حددي مكانك يدويًا.';
+                return;
+            }
+
+            const point = mapFromGps(
+                position.coords.latitude,
+                position.coords.longitude
+            );
+
+            if (!point) {
+                status.textContent =
+                    'لا تتوفر معايرة GPS موثوقة للخريطة. حددي مكانك يدويًا.';
+                return;
+            }
+
+            const [x, y] = point;
+
+            const zone = ZONES.find(z => {
+                const polygon = window.MergabMap.parsePoints(
+                    z.boundaryPoints, 3
+                );
+
+                return polygon.length >= 3 &&
+                    pointInZone(x, y, polygon);
+            });
+
+            if (!zone) {
+                status.textContent =
+                    'الموقع خارج المناطق المعروفة. حددي مكانك يدويًا.';
+                return;
+            }
+
+            myLocationPoint = [
+                Number(x.toFixed(2)),
+                Number(y.toFixed(2))
+            ];
+
+            choosingMyLocation = false;
+
+            $('startSel').value = String(zone.id);
+            currentMap()?.setStart(String(zone.id));
+            currentMap()?.clearRoute();
+
+            $('routeNote').hidden = true;
+            clearFacilityWalkingRoute();
+
+            activeZoneRouteId = null;
+            $('map').querySelector('#visitorInterZoneRoute')?.remove();
+
+            renderFacilityTargets();
+            drawMyLocation();
+
+            status.textContent =
+                `موقع GPS تقريبي داخل ${zone.name}. يمكنك تعديله يدويًا.`;
+
+        }, () => {
+            status.textContent =
+                'تعذر تحديد GPS أو انتهت المهلة. اختاري موقعك يدويًا.';
+        }, {
+            enableHighAccuracy: true,
+            timeout: 7000,
+            maximumAge: 15000
+        });
+    });
+
 
     function bindZoneClicks(container, attribute) {
         $(container).addEventListener('click', event => {
@@ -694,6 +891,765 @@
 
     message('planSteps', t('emptyRoute'));
 
+
+    // =====================================
+    // MANUAL VISITOR LOCATION
+    // =====================================
+
+    let choosingMyLocation = false;
+    let myLocationPoint = null;
+    let mapPointerStart = null;
+
+    function pointInZone(x, y, polygon) {
+        let inside = false;
+
+        for (let i = 0, j = polygon.length - 1;
+             i < polygon.length; j = i++) {
+
+            const [xi, yi] = polygon[i];
+            const [xj, yj] = polygon[j];
+
+            const cross = (x - xi) * (yj - yi) -
+                (y - yi) * (xj - xi);
+
+            if (Math.abs(cross) < 0.000001 &&
+                x >= Math.min(xi, xj) &&
+                x <= Math.max(xi, xj) &&
+                y >= Math.min(yi, yj) &&
+                y <= Math.max(yi, yj)) {
+                return true;
+            }
+
+            if ((yi > y) !== (yj > y) &&
+                x < (xj - xi) * (y - yi) / (yj - yi) + xi) {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
+    function drawMyLocation() {
+        const svg = $('map').querySelector('.mqm-isvg');
+        if (!svg) return;
+
+        svg.querySelector('#visitorLocationPin')?.remove();
+        if (!myLocationPoint) return;
+
+        const pin = document.createElementNS(
+            'http://www.w3.org/2000/svg', 'circle'
+        );
+
+        pin.setAttribute('id', 'visitorLocationPin');
+        pin.setAttribute('cx', myLocationPoint[0]);
+        pin.setAttribute('cy', myLocationPoint[1]);
+        pin.setAttribute('r', '1.3');
+        pin.setAttribute('fill', '#2563EB');
+        pin.setAttribute('stroke', '#FFFFFF');
+        pin.setAttribute('stroke-width', '0.45');
+        pin.setAttribute('pointer-events', 'none');
+
+        svg.appendChild(pin);
+    }
+
+    $('pickMyLocation').addEventListener('click', () => {
+        choosingMyLocation = true;
+
+        $('myLocationStatus').textContent =
+            'اضغطي على مكان وقوفك داخل حدود المنطقة.';
+
+        $('map').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    });
+
+    $('map').addEventListener('pointerdown', event => {
+        mapPointerStart = [event.clientX, event.clientY];
+    }, true);
+
+    $('map').addEventListener('click', event => {
+        if (!choosingMyLocation) return;
+
+        const dragged = mapPointerStart &&
+            Math.hypot(
+                event.clientX - mapPointerStart[0],
+                event.clientY - mapPointerStart[1]
+            ) > 6;
+
+        mapPointerStart = null;
+        if (dragged) return;
+
+        if (!event.target.closest('.mqm-img')) return;
+
+        const stage = $('map').querySelector('.mqm-istage');
+        if (!stage) return;
+
+        const rect = stage.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        const x = (event.clientX - rect.left) / rect.width * 100;
+        const y = (event.clientY - rect.top) / rect.height * 100;
+
+        if (x < 0 || x > 100 || y < 0 || y > 100) return;
+
+        const zone = ZONES.find(item => {
+            const polygon = window.MergabMap.parsePoints(
+                item.boundaryPoints, 3
+            );
+
+            return polygon.length >= 3 &&
+                pointInZone(x, y, polygon);
+        });
+
+        if (!zone) {
+            $('myLocationStatus').textContent =
+                'الموقع خارج حدود المناطق. اختاري نقطة داخل المنطقة.';
+            return;
+        }
+
+        myLocationPoint = [
+            Number(x.toFixed(2)),
+            Number(y.toFixed(2))
+        ];
+
+        choosingMyLocation = false;
+
+        $('startSel').value = String(zone.id);
+        currentMap()?.setStart(String(zone.id));
+        currentMap()?.clearRoute();
+        $('routeNote').hidden = true;
+        clearFacilityWalkingRoute();
+
+        activeZoneRouteId = null;
+        $('map').querySelector('#visitorInterZoneRoute')?.remove();
+
+        renderFacilityTargets();
+        drawMyLocation();
+
+        $('myLocationStatus').textContent =
+            `تم تحديد موقعك داخل منطقة ${zone.name}.`;
+    }, true);
+
+
+    function findFacilityWalkingRoute(start, zoneKey, facility) {
+        const parse = value => window.MergabMap.parsePoints(value);
+
+        const walks = ROUTE_NETWORK.walkPaths
+            .filter(w =>
+                String(w.zoneId) === String(zoneKey) &&
+                w.active !== false
+            )
+            .flatMap(w => {
+                const points = parse(w.pathPoints);
+
+                return points.slice(1).map((p, i) => ({
+                    a: points[i],
+                    b: p,
+                    direction: w.direction || 'BOTH',
+                    cuts: [0, 1]
+                }));
+            });
+
+        if (!walks.length) return null;
+
+        const distance = (a, b) =>
+            Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+        const pointOn = (s, t) => [
+            s.a[0] + (s.b[0] - s.a[0]) * t,
+            s.a[1] + (s.b[1] - s.a[1]) * t
+        ];
+
+        function nearest(point) {
+            let best = null;
+
+            walks.forEach(s => {
+                const dx = s.b[0] - s.a[0];
+                const dy = s.b[1] - s.a[1];
+                const length2 = dx * dx + dy * dy;
+
+                const t = length2
+                    ? Math.max(0, Math.min(1,
+                        ((point[0] - s.a[0]) * dx +
+                            (point[1] - s.a[1]) * dy) / length2
+                    ))
+                    : 0;
+
+                const p = pointOn(s, t);
+                const d = distance(point, p);
+
+                if (!best || d < best.d) {
+                    best = { s, t, p, d };
+                }
+            });
+
+            return best;
+        }
+
+        // Only allow a short estimated approach to the walkway.
+        const origin = nearest(start);
+
+        if (!origin || origin.d > 1.5) return null;
+
+        origin.s.cuts.push(origin.t);
+
+        // Connect intersecting walking segments.
+        for (let i = 0; i < walks.length; i++) {
+            for (let j = i + 1; j < walks.length; j++) {
+                const a = walks[i];
+                const b = walks[j];
+
+                const rx = a.b[0] - a.a[0];
+                const ry = a.b[1] - a.a[1];
+                const sx = b.b[0] - b.a[0];
+                const sy = b.b[1] - b.a[1];
+
+                const den = rx * sy - ry * sx;
+
+                if (Math.abs(den) < 1e-9) continue;
+
+                const qx = b.a[0] - a.a[0];
+                const qy = b.a[1] - a.a[1];
+
+                const t = (qx * sy - qy * sx) / den;
+                const u = (qx * ry - qy * rx) / den;
+
+                if (
+                    t >= -1e-8 && t <= 1 + 1e-8 &&
+                    u >= -1e-8 && u <= 1 + 1e-8
+                ) {
+                    a.cuts.push(Math.max(0, Math.min(1, t)));
+                    b.cuts.push(Math.max(0, Math.min(1, u)));
+                }
+            }
+        }
+
+        // Facility connections must allow entering the facility.
+        const entries = ROUTE_NETWORK.accessPaths
+            .filter(a =>
+                String(a.facilityId) === String(facility.id) &&
+                a.active !== false &&
+                a.direction !== 'FROM_FACILITY'
+            )
+            .map(a => ({
+                path: a,
+                points: parse(a.pathPoints)
+            }))
+            .filter(a => a.points.length >= 2)
+            .map(a => ({
+                ...a,
+                attach: nearest(a.points[0])
+            }))
+            .filter(a =>
+                a.attach &&
+                a.attach.d <= 0.5 &&
+                distance(
+                    a.points.at(-1),
+                    [Number(facility.mapX), Number(facility.mapY)]
+                ) <= 0.5
+            );
+
+        if (!entries.length) return null;
+
+        entries.forEach(entry => {
+            entry.attach.s.cuts.push(entry.attach.t);
+        });
+
+        const graph = new Map();
+
+        const key = p =>
+            p.map(n => n.toFixed(5)).join(',');
+
+        const add = (a, b) => {
+            const u = key(a);
+            const v = key(b);
+
+            if (u === v) return;
+
+            if (!graph.has(u)) graph.set(u, []);
+
+            graph.get(u).push({
+                to: v,
+                d: distance(a, b)
+            });
+        };
+
+        // Walking paths, respecting movement directions.
+        for (const s of walks) {
+            const cuts = s.cuts.slice()
+                .sort((a, b) => a - b)
+                .filter((value, i, all) =>
+                    i === 0 || value - all[i - 1] > 1e-9
+                );
+
+            for (let i = 1; i < cuts.length; i++) {
+                const a = pointOn(s, cuts[i - 1]);
+                const b = pointOn(s, cuts[i]);
+
+                if (s.direction !== 'REVERSE') {
+                    add(a, b);
+                }
+
+                if (s.direction !== 'FORWARD') {
+                    add(b, a);
+                }
+            }
+        }
+
+        add(start, origin.p);
+
+        // Connect walkways to the actual facility entrances.
+        for (const entry of entries) {
+            const points = entry.points;
+
+            add(entry.attach.p, points[0]);
+
+            for (let i = 1; i < points.length; i++) {
+                add(points[i - 1], points[i]);
+            }
+
+            add(
+                points.at(-1),
+                [Number(facility.mapX), Number(facility.mapY)]
+            );
+        }
+
+        // Dijkstra shortest-path search.
+        const source = key(start);
+
+        const destination = key([
+            Number(facility.mapX),
+            Number(facility.mapY)
+        ]);
+
+        const best = new Map([[source, 0]]);
+        const previous = new Map();
+        const visited = new Set();
+
+        while (true) {
+            let current = null;
+            let cost = Infinity;
+
+            for (const [node, value] of best) {
+                if (!visited.has(node) && value < cost) {
+                    current = node;
+                    cost = value;
+                }
+            }
+
+            if (!current || current === destination) break;
+
+            visited.add(current);
+
+            for (const edge of graph.get(current) || []) {
+                const alt = cost + edge.d;
+
+                if (alt < (best.get(edge.to) ?? Infinity)) {
+                    best.set(edge.to, alt);
+                    previous.set(edge.to, current);
+                }
+            }
+        }
+
+        if (!best.has(destination)) return null;
+
+        const points = [];
+        let cursor = destination;
+
+        while (cursor) {
+            points.unshift(cursor.split(',').map(Number));
+            cursor = previous.get(cursor);
+        }
+
+        return {
+            points,
+            length: best.get(destination)
+        };
+    }
+
+
+    let activeFacilityId = null;
+
+    function clearFacilityWalkingRoute() {
+        activeFacilityId = null;
+
+        $('map')
+            .querySelector('#visitorWalkingRoute')
+            ?.remove();
+
+        $('facilityRouteStatus').textContent = '';
+    }
+
+    function renderFacilityTargets() {
+        const select = $('facilityDest');
+        const previous = select.value;
+        const zone = byId($('startSel').value);
+
+        select.replaceChildren(
+            new Option('اختاري المرفق', '')
+        );
+
+        if (!myLocationPoint || !zone) return;
+
+        const boundary = window.MergabMap.parsePoints(
+            zone.boundaryPoints, 3
+        );
+
+        if (boundary.length < 3) return;
+
+        ROUTE_NETWORK.facilities.forEach(facility => {
+            if (
+                facility.mapX == null ||
+                facility.mapY == null
+            ) return;
+
+            if (!pointInZone(
+                Number(facility.mapX),
+                Number(facility.mapY),
+                boundary
+            )) return;
+
+            select.add(new Option(
+                facility.name,
+                String(facility.id)
+            ));
+        });
+
+        if ([...select.options].some(o => o.value === previous)) {
+            select.value = previous;
+        }
+    }
+
+    function showFacilityWalkingRoute(facilityId) {
+        $('map')
+            .querySelector('#visitorWalkingRoute')
+            ?.remove();
+
+        const facility = ROUTE_NETWORK.facilities.find(
+            f => String(f.id) === String(facilityId)
+        );
+
+        if (!facility || !myLocationPoint) {
+            clearFacilityWalkingRoute();
+            return;
+        }
+
+        const result = findFacilityWalkingRoute(
+            myLocationPoint,
+            $('startSel').value,
+            facility
+        );
+
+        if (!result) {
+            activeFacilityId = null;
+
+            $('facilityRouteStatus').textContent =
+                'لا يوجد مسار مشي متصل لهذا المرفق، أو أن نقطة البداية بعيدة عن الممر.';
+            return;
+        }
+
+        const svg = $('map').querySelector('.mqm-isvg');
+        if (!svg) return;
+
+        currentMap()?.clearRoute();
+
+        activeZoneRouteId = null;
+        $('map').querySelector('#visitorInterZoneRoute')?.remove();
+
+        const path = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'polyline'
+        );
+
+        path.id = 'visitorWalkingRoute';
+
+        path.setAttribute(
+            'points',
+            result.points.map(p => p.join(',')).join(' ')
+        );
+
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', '#2563EB');
+        path.setAttribute('stroke-width', '1.1');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('vector-effect', 'non-scaling-stroke');
+        path.setAttribute('pointer-events', 'none');
+
+        svg.appendChild(path);
+
+        activeFacilityId = facility.id;
+        drawMyLocation();
+
+        $('facilityRouteStatus').textContent =
+            `تم رسم المسار إلى ${facility.name}. ` +
+            'الانتقال القصير من موقعك إلى أقرب ممر تقديري.';
+    }
+
+    $('findFacilityRouteBtn').addEventListener('click', () => {
+        if (!myLocationPoint) {
+            $('facilityRouteStatus').textContent =
+                'حددي مكان وقوفك أولًا على الخريطة.';
+            return;
+        }
+
+        if (!$('facilityDest').value) {
+            $('facilityRouteStatus').textContent =
+                'اختاري المرفق المطلوب.';
+            return;
+        }
+
+        showFacilityWalkingRoute($('facilityDest').value);
+    });
+    $('facilityDest').addEventListener('change', () => {
+        clearFacilityWalkingRoute();
+        activeZoneRouteId = null;
+        $('map').querySelector('#visitorInterZoneRoute')?.remove();
+    });
+
+
+    let activeZoneRouteId = null;
+
+    function findInterZoneRoute(start, startZoneId, targetZoneId) {
+        const parse = value => window.MergabMap.parsePoints(value);
+        const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+        const key = p => p.map(n => n.toFixed(5)).join(',');
+
+        const walks = ROUTE_NETWORK.walkPaths
+            .filter(w => w.active !== false)
+            .flatMap(w => {
+                const pts = parse(w.pathPoints);
+                return pts.slice(1).map((b, i) => ({
+                    a: pts[i], b, zone: String(w.zoneId),
+                    dir: w.direction || 'BOTH', cuts: [0, 1]
+                }));
+            });
+
+        const projection = (p, s) => {
+            const dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1];
+            const len = dx * dx + dy * dy;
+            const t = len ? Math.max(0, Math.min(1,
+                ((p[0] - s.a[0]) * dx + (p[1] - s.a[1]) * dy) / len
+            )) : 0;
+
+            const point = [s.a[0] + t * dx, s.a[1] + t * dy];
+            return { s, t, point, d: dist(p, point) };
+        };
+
+        const nearest = (p, zone) => walks
+            .filter(s => s.zone === String(zone))
+            .map(s => projection(p, s))
+            .sort((a, b) => a.d - b.d)[0];
+
+        const origin = nearest(start, startZoneId);
+        if (!origin || origin.d > 1.5) return null;
+        origin.s.cuts.push(origin.t);
+
+        // Intersections inside the same zone
+        for (let i = 0; i < walks.length; i++) {
+            for (let j = i + 1; j < walks.length; j++) {
+                const a = walks[i], b = walks[j];
+                if (a.zone !== b.zone) continue;
+
+                const rx = a.b[0] - a.a[0], ry = a.b[1] - a.a[1];
+                const sx = b.b[0] - b.a[0], sy = b.b[1] - b.a[1];
+                const den = rx * sy - ry * sx;
+                if (Math.abs(den) < 1e-9) continue;
+
+                const qx = b.a[0] - a.a[0], qy = b.a[1] - a.a[1];
+                const t = (qx * sy - qy * sx) / den;
+                const u = (qx * ry - qy * rx) / den;
+
+                if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+                    a.cuts.push(t);
+                    b.cuts.push(u);
+                }
+            }
+        }
+
+        // Connect only saved inter-zone paths to nearby walkways
+        const links = [];
+
+        for (const c of ZONE_CONNECTIONS) {
+            const from = String(c.fromZone?.id ?? c.fromZoneId ?? '');
+            const to = String(c.toZone?.id ?? c.toZoneId ?? '');
+            let pts = parse(c.pathPoints);
+
+            if (!from || !to || pts.length < 2) continue;
+
+            const fromZone = byId(from), toZone = byId(to);
+            if (!fromZone || !toZone ||
+                !mappable(fromZone) || !mappable(toZone)) continue;
+
+            const f = [Number(fromZone.mapX), Number(fromZone.mapY)];
+            const t = [Number(toZone.mapX), Number(toZone.mapY)];
+
+            if (dist(pts[0], f) + dist(pts.at(-1), t) >
+                dist(pts[0], t) + dist(pts.at(-1), f)) {
+                pts = [...pts].reverse();
+            }
+
+            const a = nearest(pts[0], from);
+            const b = nearest(pts.at(-1), to);
+
+            if (!a || !b || a.d > 0.5 || b.d > 0.5) continue;
+
+            a.s.cuts.push(a.t);
+            b.s.cuts.push(b.t);
+            links.push({ pts, a, b, to });
+        }
+
+        if (!links.length) return null;
+
+        const graph = new Map();
+
+        const add = (a, b) => {
+            const u = key(a), v = key(b);
+            if (u === v) return;
+
+            if (!graph.has(u)) graph.set(u, []);
+            graph.get(u).push({ to: v, weight: dist(a, b) });
+        };
+
+        for (const s of walks) {
+            const cuts = [...new Set(
+                s.cuts.map(t => t.toFixed(9))
+            )].map(Number).sort((a, b) => a - b);
+
+            for (let i = 1; i < cuts.length; i++) {
+                const point = v => [
+                    s.a[0] + (s.b[0] - s.a[0]) * v,
+                    s.a[1] + (s.b[1] - s.a[1]) * v
+                ];
+
+                const a = point(cuts[i - 1]);
+                const b = point(cuts[i]);
+
+                if (s.dir !== 'REVERSE') add(a, b);
+                if (s.dir !== 'FORWARD') add(b, a);
+            }
+        }
+
+        add(start, origin.point);
+
+        const goals = new Set();
+
+        for (const c of links) {
+            add(c.a.point, c.pts[0]);
+
+            for (let i = 1; i < c.pts.length; i++) {
+                add(c.pts[i - 1], c.pts[i]);
+            }
+
+            add(c.pts.at(-1), c.b.point);
+
+            if (c.to === String(targetZoneId)) {
+                goals.add(key(c.pts.at(-1)));
+            }
+        }
+
+        if (!goals.size) return null;
+
+        // Shortest route using Dijkstra
+        const costs = new Map([[key(start), 0]]);
+        const prev = new Map();
+        const done = new Set();
+
+        while (true) {
+            let u = null, cheapest = Infinity;
+
+            for (const [id, cost] of costs) {
+                if (!done.has(id) && cost < cheapest) {
+                    u = id;
+                    cheapest = cost;
+                }
+            }
+
+            if (!u) break;
+
+            if (goals.has(u)) {
+                const points = [];
+
+                for (let cursor = u; cursor; cursor = prev.get(cursor)) {
+                    points.unshift(cursor.split(',').map(Number));
+                }
+
+                return { points, length: cheapest };
+            }
+
+            done.add(u);
+
+            for (const edge of graph.get(u) || []) {
+                const next = cheapest + edge.weight;
+
+                if (next < (costs.get(edge.to) ?? Infinity)) {
+                    costs.set(edge.to, next);
+                    prev.set(edge.to, u);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    function showInterZoneRoute(targetId) {
+        $('map').querySelector('#visitorInterZoneRoute')?.remove();
+
+        if (!myLocationPoint) return null;
+
+        const result = findInterZoneRoute(
+            myLocationPoint,
+            $('startSel').value,
+            targetId
+        );
+
+        if (!result) {
+            activeZoneRouteId = null;
+            return null;
+        }
+
+        currentMap()?.clearRoute();
+
+        const svg = $('map').querySelector('.mqm-isvg');
+        if (!svg) return null;
+
+        const line = document.createElementNS(
+            'http://www.w3.org/2000/svg', 'polyline'
+        );
+
+        line.id = 'visitorInterZoneRoute';
+        line.setAttribute(
+            'points',
+            result.points.map(p => p.join(',')).join(' ')
+        );
+
+        Object.entries({
+            fill: 'none',
+            stroke: '#2563EB',
+            'stroke-width': '1.15',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'vector-effect': 'non-scaling-stroke',
+            'pointer-events': 'none'
+        }).forEach(([name, value]) => line.setAttribute(name, value));
+
+        svg.appendChild(line);
+        drawMyLocation();
+
+        activeZoneRouteId = String(targetId);
+
+        const meters = Math.round(result.length * 8);
+
+        return {
+            best: {
+                meters,
+                minutes: Math.max(1, Math.ceil(meters / 75))
+            }
+        };
+    }
+
+
     bindZoneClicks('layers', 'data-zone');
     bindZoneClicks('crowd', 'data-zone');
     bindZoneClicks('sugList', 'data-zone');
@@ -723,7 +1679,20 @@
     });
 
     $('startSel').addEventListener('change', event => {
+        myLocationPoint = null;
+        choosingMyLocation = false;
+        drawMyLocation();
+        clearFacilityWalkingRoute();
+        activeZoneRouteId = null;
+        $('map').querySelector('#visitorInterZoneRoute')?.remove();
+        renderFacilityTargets();
+
         currentMap()?.setStart(event.target.value);
+        currentMap()?.clearRoute();
+        $('routeNote').hidden = true;
+
+        $('myLocationStatus').textContent =
+            'تم تغيير منطقة البداية. يمكنك تحديد موقعك الدقيق على الخريطة.';
     });
 
     $('planForm').addEventListener('submit', buildPlan);
@@ -748,6 +1717,7 @@
 
     controller = window.MergabMap.mount('#map', {
         imageSrc: '/img/map/expo-map-concept.jpg',
+        hideLocation: true,
 
         refreshMs: 30000,
 

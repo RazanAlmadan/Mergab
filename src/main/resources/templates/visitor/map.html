@@ -80,6 +80,41 @@
            aria-label="خريطة إكسبو التفاعلية">
       </div>
 
+      <div class="map-location-tools">
+        <button type="button"
+                class="btn btn-primary"
+                id="pickMyLocation">
+          <span class="material-symbols-rounded">location_on</span>
+          تحديد موقعي على الخريطة
+        </button>
+        <button type="button" class="btn btn-primary" id="gpsMyLocation">
+          <span class="material-symbols-rounded">my_location</span>
+          تحديد موقعي GPS
+        </button>
+
+        <span id="myLocationStatus" role="status">
+        يمكنك تحديد مكان وقوفك يدويًا.
+    </span>
+      </div>
+
+      <div class="map-location-tools">
+        <label class="field">
+          <span>المرفق المطلوب</span>
+          <select id="facilityDest">
+            <option value="">حددي موقعك أولًا</option>
+          </select>
+        </label>
+
+        <button type="button"
+                class="btn btn-primary"
+                id="findFacilityRouteBtn">
+          <span class="material-symbols-rounded">route</span>
+          اعرض مسار المرفق
+        </button>
+
+        <span id="facilityRouteStatus" role="status"></span>
+      </div>
+
       <section class="card sel-card"
                id="selCard"
                aria-live="polite"
