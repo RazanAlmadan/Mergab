@@ -95,18 +95,23 @@
             mapControl?.getMap()?.select(selected);
         }
 
-        const percent = z.capacity > 0
-            ? Math.round(
-                (+z.initialVisitors || 0) * 100 / +z.capacity
-            )
-            : 0;
+        const count = z.currentCount;
 
-        $('homeMapSelected').textContent =
-            `${z.name} — ${tr(
-                'الإشغال المسجّل',
-                'Recorded occupancy'
-            )}: ${Math.max(0, percent)}% ` +
-            `(${+z.initialVisitors || 0}/${+z.capacity || 0})`;
+        const available =
+            count != null &&
+            Number(z.capacity) > 0;
+
+        const percent = available
+            ? Math.round(Number(count) / Number(z.capacity) * 100)
+            : null;
+
+        $('homeMapSelected').textContent = available
+            ? `${z.name} — ${tr('الإشغال الحالي', 'Live occupancy')}: ` +
+            `${percent}% (${count}/${z.capacity})`
+            : `${z.name} — ${tr(
+                'بيانات الازدحام غير متاحة مؤقتًا',
+                'Live occupancy unavailable'
+            )}`;
 
         $('homeMapDestination').value = selected;
     }

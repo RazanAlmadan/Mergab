@@ -131,14 +131,20 @@
         Number(z.mapY) >= 0 &&
         Number(z.mapY) <= 100;
 
-    const percent = z =>
-        Math.round(
-            (Number(z.initialVisitors) || 0) /
-            (Number(z.capacity) || 1) * 100
+    const percent = z => {
+        if (z?.currentCount == null ||
+            Number(z.capacity) <= 0) {
+            return null;
+        }
+
+        return Math.round(
+            Number(z.currentCount) / Number(z.capacity) * 100
         );
+    };
 
     const crowdType = z => {
         const p = percent(z);
+        if (p === null) return 'unknown';
 
         if (p >= 90) return 'critical';
         if (p >= 75) return 'high';
@@ -148,6 +154,7 @@
     };
 
     const crowdName = z => ({
+        unknown: lang() === 'ar' ? 'غير متوفر' : 'Unavailable',
         critical: t('high'),
         high: t('busy'),
         medium: t('medium'),
@@ -155,6 +162,7 @@
     })[crowdType(z)];
 
     const crowdColor = z => ({
+        unknown: '#94A3B8',
         critical: '#C0392B',
         high: '#E8964A',
         medium: '#F2D27A',
@@ -257,7 +265,7 @@
         }
 
         const sorted = ZONES.slice().sort(
-            (a, b) => percent(b) - percent(a)
+            (a, b) => (percent(b) ?? -1) - (percent(a) ?? -1)
         );
 
         $('crowd').innerHTML = sorted.map(zone => `
@@ -282,7 +290,7 @@
                 </span>
 
                 <span class="pct" dir="ltr">
-                    ${percent(zone)}%
+                   ${percent(zone) == null ? '—' : percent(zone) + '%'}
                 </span>
             </button>
         `).join('');
@@ -308,9 +316,11 @@
             'map-badge ' + crowdType(zone);
 
         $('sBadge').textContent =
-            crowdName(zone) + ' · ' + percent(zone) + '%';
+            crowdName(zone) + ' · ' +
+            (percent(zone) == null ? '—' : percent(zone) + '%');
 
-        $('sCount').textContent = number(zone.initialVisitors);
+        $('sCount').textContent =
+            zone.currentCount == null ? '—' : number(zone.currentCount);
         $('sCap').textContent = number(zone.capacity);
         $('sEvents').textContent = number(eventCount(zone));
 
@@ -366,6 +376,7 @@
         const suggestions = [];
 
         const quiet = usableZones()
+            .filter(z => percent(z) !== null)
             .slice()
             .sort((a, b) => percent(a) - percent(b))[0];
 

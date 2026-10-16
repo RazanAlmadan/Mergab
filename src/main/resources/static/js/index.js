@@ -181,14 +181,15 @@
     }
 
     function occupancyRatio(zone) {
-        const capacity = Number(zone?.capacity);
-        const count = Number(
-            zone?.currentVisitors ??
-            zone?.currentCount ??
-            zone?.initialVisitors
-        );
+        if (zone?.currentCount == null) return null;
 
-        if (capacity <= 0 || !Number.isFinite(count)) return null;
+        const capacity = Number(zone.capacity);
+        const count = Number(zone.currentCount);
+
+        if (capacity <= 0 || !Number.isFinite(count)) {
+            return null;
+        }
+
         return Math.max(0, count / capacity);
     }
 
@@ -458,7 +459,7 @@
         ]);
 
         if (results[0].status === 'fulfilled') {
-            zones = results[0].value;
+            zones = await Mergab.withLiveOccupancy(results[0].value);
             zonesLoaded = true;
             renderZones();
         } else {

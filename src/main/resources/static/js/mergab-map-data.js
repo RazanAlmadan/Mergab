@@ -754,9 +754,11 @@
 
             try {
 
-                const zones = await getList(
-                    "/zone/get"
-                );
+                const savedZones = await getList("/zone/get");
+
+                const zones = options.autoOccupancy === false
+                    ? savedZones
+                    : await global.Mergab.withLiveOccupancy(savedZones);
 
                 try {
 
@@ -890,7 +892,10 @@
                 // that don't change zone positions.
 
                 if (instance) {
-                    if (options.autoOccupancy !== false) {
+                    if (
+                        options.autoOccupancy !== false &&
+                        zones.every(zone => zone.currentCount !== null)
+                    ) {
                         instance.setOccupancy(zones);
                     }
 
