@@ -317,6 +317,42 @@ document.addEventListener("DOMContentLoaded", () => {
             "pointer-events": "none"
         }, layer);
         drawDirectionArrows(layer, routePath, color);
+
+        // Animated flow + a moving visitor dot on saved routes
+        if (!dashed) {
+            svgElement("path", {
+                d,
+                class: "mg-flow",
+                fill: "none",
+                stroke: "#FFF6DF",
+                "stroke-width": 2,
+                "stroke-dasharray": "2 12",
+                "vector-effect": "non-scaling-stroke",
+                "pointer-events": "none"
+            }, layer);
+
+            const svg = layer.ownerSVGElement;
+            const ratio = svg?.clientWidth && svg?.clientHeight
+                ? svg.clientWidth / svg.clientHeight : 1.5;
+
+            const dot = svgElement("g", { class: "mg-dot" }, layer);
+
+            svgElement("ellipse", {
+                rx: 1.2 / ratio, ry: 1.2,
+                fill: color, opacity: 0.4
+            }, dot);
+
+            svgElement("ellipse", {
+                rx: 0.5 / ratio, ry: 0.5,
+                fill: "#FFFFFF"
+            }, dot);
+
+            svgElement("animateMotion", {
+                dur: "5s",
+                repeatCount: "indefinite",
+                path: d
+            }, dot);
+        }
     }
 
 
@@ -330,6 +366,19 @@ document.addEventListener("DOMContentLoaded", () => {
             "stroke-width": 0.28,
             "pointer-events": "none"
         }, layer);
+    }
+
+    // Screen click → map percentage (works for flat and 3D views)
+    function eventMapPoint(event, rect) {
+        const point = expoMap?.toMapPoint?.(
+            event.clientX,
+            event.clientY
+        );
+
+        return point || [
+            (event.clientX - rect.left) / rect.width * 100,
+            (event.clientY - rect.top) / rect.height * 100
+        ];
     }
 
     // =====================================
@@ -385,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (points.length < 2) return;
 
-            drawLine(layer, points, "#247C59", 0.75);
+            drawLine(layer, points, "#B6863C", 0.75);
         });
 
         // Route currently being drawn or edited
@@ -447,6 +496,12 @@ document.addEventListener("DOMContentLoaded", () => {
             start: null,
             matchBy: "id",
             imageFit: "contain",
+
+            // Same night command-center look as the dashboard.
+            // 3D stays off while drawing (toggle with the cube button).
+            theme: "organizer",
+            perspective: true,
+            start3d: false,
 
             imageLayout: {
                 src: MAP_IMAGE,
@@ -804,13 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const rect = stage.getBoundingClientRect();
 
-        const x =
-            (event.clientX - rect.left) /
-            rect.width * 100;
-
-        const y =
-            (event.clientY - rect.top) /
-            rect.height * 100;
+        const [x, y] = eventMapPoint(event, rect);
 
         if (
             !Number.isFinite(x) ||

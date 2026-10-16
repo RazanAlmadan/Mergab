@@ -246,6 +246,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return element;
     }
 
+
+    // Screen click → map percentage (works for flat and 3D views)
+    function eventMapPoint(event, rect) {
+        const point = map?.toMapPoint?.(
+            event.clientX,
+            event.clientY
+        );
+
+        return point || [
+            (event.clientX - rect.left) / rect.width * 100,
+            (event.clientY - rect.top) / rect.height * 100
+        ];
+    }
+
     // =====================================
     // DRAW BOUNDARIES ON MAP
     // =====================================
@@ -424,6 +438,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 matchBy: "id",
 
                 imageFit: "contain",
+
+                // Night command-center look; 3D off while editing
+                theme: "organizer",
+                perspective: true,
+                start3d: false,
 
                 imageLayout: {
                     src: MAP_IMAGE,
@@ -645,11 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const rect = stage.getBoundingClientRect();
 
-                const x = (event.clientX - rect.left)
-                    / rect.width * 100;
-
-                const y = (event.clientY - rect.top)
-                    / rect.height * 100;
+                const [x, y] = eventMapPoint(event, rect);
 
                 const polygon = parseBoundary(
                     selectedFacilityZone.boundaryPoints
@@ -730,13 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const rect =
                 stage.getBoundingClientRect();
 
-            const x =
-                (event.clientX - rect.left) /
-                rect.width * 100;
-
-            const y =
-                (event.clientY - rect.top) /
-                rect.height * 100;
+            const [x, y] = eventMapPoint(event, rect);
 
             if (
                 !Number.isFinite(x) ||
@@ -1024,6 +1033,8 @@ document.addEventListener("DOMContentLoaded", () => {
         $("facilityForm").hidden = true;
         $("facilityForm").reset();
         mapElement.querySelector("#facilitiesLayer")?.remove();
+        mapElement.querySelectorAll(".mg-fpin")
+            .forEach(pin => pin.remove());
 
         facilityPicking = false;
         mapElement.classList.remove("is-placing");
@@ -1504,6 +1515,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         svg.querySelector("#facilitiesLayer")?.remove();
 
+        // Same type-aware pins used on the live maps
+        if (window.MirqabMap?.facilityPins) {
+            MirqabMap.facilityPins(
+                mapElement.querySelector(".mqm-istage"),
+                facilities
+            );
+            return;
+        }
+
         const layer = createSVGElement("g", {
             id: "facilitiesLayer",
             "pointer-events": "none"
@@ -1885,6 +1905,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function routePolyline(points, layer, stroke, dash = "") {
         if (points.length < 2) return null;
+
+        // Animated flow on active paths (direction of drawing)
+        if (!dash) {
+            createSVGElement("polyline", {
+                points: points.map(point => point.join(",")).join(" "),
+                class: "mg-flow",
+                fill: "none",
+                stroke: "#FFFFFF",
+                "stroke-width": 1.6,
+                "stroke-dasharray": "2 12",
+                "stroke-opacity": 0.9,
+                "vector-effect": "non-scaling-stroke",
+                "pointer-events": "none"
+            }, layer);
+        }
 
         return createSVGElement("polyline", {
             points: points.map(point => point.join(",")).join(" "),
@@ -2556,11 +2591,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const rect = stage.getBoundingClientRect();
 
-        const x =
-            (event.clientX - rect.left) / rect.width * 100;
-
-        const y =
-            (event.clientY - rect.top) / rect.height * 100;
+        const [x, y] = eventMapPoint(event, rect);
 
         const polygon = parseBoundary(
             selectedFacilityZone.boundaryPoints
