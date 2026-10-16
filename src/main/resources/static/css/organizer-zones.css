@@ -398,3 +398,271 @@
     color: #6b7d72;
     font-size: 12px;
 }
+
+
+
+/* ==========================================
+   MERGAB | FACILITIES MANAGEMENT
+   ========================================== */
+
+#facilityManager {
+    margin-bottom: 24px;
+}
+
+#facilityManager[hidden],
+#facilityForm[hidden] {
+    display: none !important;
+}
+
+/* Facilities toolbar */
+
+.facility-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.facility-toolbar h3 {
+    margin: 0;
+    color: var(--org-green);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+#facilityZoneName {
+    color: var(--org-muted);
+    font-size: 12px;
+}
+
+/* Facility form */
+
+#facilityForm {
+    margin-top: 28px;
+    padding: 24px;
+    background: #f8faf7;
+    border: 1px solid #e1e8e1;
+    border-radius: 15px;
+}
+
+#facilityFormTitle {
+    margin: 0 0 24px;
+    color: var(--org-green);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Facility inputs and selects */
+
+#facilityForm .zones-field input,
+#facilityForm .zones-field select {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 13px;
+    border: 1px solid #dce5de;
+    border-radius: 11px;
+    background: #fff;
+    color: var(--org-text);
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+#facilityForm .zones-field input:focus,
+#facilityForm .zones-field select:focus {
+    border-color: #398565;
+    box-shadow: 0 0 0 3px rgba(57, 133, 101, .11);
+}
+
+#facilityForm .zones-field input[readonly] {
+    background: #edf2ed;
+    color: #557267;
+    cursor: default;
+}
+
+/* Location picker */
+
+#pickFacilityLocation {
+    width: fit-content;
+    max-width: 100%;
+}
+
+#facilityLocationHint {
+    color: var(--org-muted);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+#facilityForm .zones-coordinates input {
+    text-align: center;
+}
+
+/* Facility actions */
+
+#facilityManager .zones-table td:last-child {
+    white-space: nowrap;
+}
+
+#facilityManager .zones-table button {
+    transition: background .2s ease;
+}
+
+#facilityManager .zones-table button:hover {
+    background: #edf5ef;
+}
+
+#facilityManager .zones-table button.delete-facility {
+    color: #ba514a;
+}
+
+#facilityManager .zones-table button.delete-facility:hover {
+    background: #fff0ed;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+
+    .facility-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .facility-toolbar .zones-primary-btn {
+        width: 100%;
+    }
+
+    #facilityForm {
+        padding: 16px;
+    }
+
+    #facilityManager .zones-table {
+        min-width: 650px;
+    }
+
+    #pickFacilityLocation {
+        width: 100%;
+    }
+}
+
+
+/* MERGAB | WALKWAYS & FACILITY ACCESS */
+
+.mergab-network {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #dce8df;
+}
+
+.mergab-network-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.mergab-network-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    border: 1px solid #dce8df;
+    background: #fbfcfa;
+    border-radius: 15px;
+}
+
+.mergab-network-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--org-green);
+    font-size: 15px;
+    margin: 0 0 4px;
+}
+
+.mergab-network-card .zones-field input,
+.mergab-network-card .zones-field select {
+    min-height: 42px;
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #dce5de;
+    border-radius: 10px;
+    font: inherit;
+    background: white;
+}
+
+.mergab-network-card small {
+    font-size: 12px;
+    color: var(--org-muted);
+    line-height: 1.8;
+}
+
+.mergab-check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mergab-check input {
+    accent-color: #247c59;
+}
+
+.mergab-network-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mergab-network-actions button {
+    min-height: 36px;
+    font-size: 12px;
+    padding: 7px 11px;
+}
+
+.mergab-route-list {
+    max-height: 225px;
+    overflow: auto;
+    margin-top: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.mergab-route-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 8px;
+    background: white;
+    border: 1px solid #e3eae3;
+    border-radius: 9px;
+}
+
+.mergab-route-item > span {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.mergab-route-item button {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 5px;
+    color: var(--org-green);
+}
+
+.mergab-route-item button.delete-zone {
+    color: #bc4e49;
+}
+
+@media (max-width: 800px) {
+    .mergab-network-columns {
+        grid-template-columns: 1fr;
+    }
+}

@@ -268,6 +268,183 @@
 
       </section>
 
+
+      <!-- FACILITIES MANAGEMENT -->
+      <section id="facilityManager"
+               class="organizer-panel zones-editor"
+               hidden>
+
+        <div class="organizer-panel-heading">
+          <div>
+            <h2>إدارة مرافق المنطقة</h2>
+            <p id="facilityZoneName">المنطقة المحددة</p>
+          </div>
+
+          <button type="button"
+                  id="closeFacilityManager"
+                  class="zones-icon-btn"
+                  aria-label="إغلاق">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <!-- FACILITIES LIST -->
+        <div class="facility-toolbar">
+          <h3>المرافق المسجلة</h3>
+
+          <button type="button"
+                  id="addFacilityButton"
+                  class="zones-primary-btn">
+            <span class="material-symbols-rounded">add</span>
+            إضافة مرفق
+          </button>
+        </div>
+
+        <div class="zones-table-wrap">
+          <table class="zones-table">
+            <thead>
+            <tr>
+              <th>اسم المرفق</th>
+              <th>النوع</th>
+              <th>مخصص لـ</th>
+              <th>الموقع</th>
+              <th>الإجراءات</th>
+            </tr>
+            </thead>
+
+            <tbody id="facilitiesTableBody">
+            <tr>
+              <td colspan="5">
+                جارٍ تحميل المرافق...
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ADD / EDIT FACILITY -->
+        <form id="facilityForm" hidden>
+
+          <input type="hidden" id="facilityId">
+          <input type="hidden" id="facilityZoneId">
+
+          <h3 id="facilityFormTitle">إضافة مرفق جديد</h3>
+
+          <div class="zones-form-grid">
+
+            <div class="zones-field">
+              <label for="facilityName">اسم المرفق</label>
+              <input type="text"
+                     id="facilityName"
+                     maxlength="100"
+                     required
+                     placeholder="مثال: دورات مياه - بوابة 3">
+            </div>
+
+            <div class="zones-field">
+              <label for="facilityType">نوع المرفق</label>
+              <select id="facilityType" required>
+                <option value="">اختاري النوع</option>
+                <option value="RESTROOM">دورات مياه</option>
+                <option value="PRAYER_ROOM">مصلى</option>
+                <option value="EXIT">مخرج</option>
+                <option value="ENTRANCE">مدخل</option>
+              </select>
+            </div>
+
+            <div class="zones-field">
+              <label for="facilityGender">مخصص لـ</label>
+              <select id="facilityGender" required>
+                <option value="BOTH">الجميع</option>
+                <option value="MALE">الرجال</option>
+                <option value="FEMALE">النساء</option>
+              </select>
+            </div>
+
+            <div class="zones-field">
+              <label>الموقع على خريطة إكسبو</label>
+
+              <div class="zones-coordinates">
+                <input type="number"
+                       id="facilityMapX"
+                       placeholder="X"
+                       readonly
+                       required>
+
+                <input type="number"
+                       id="facilityMapY"
+                       placeholder="Y"
+                       readonly
+                       required>
+              </div>
+
+              <button type="button"
+                      id="pickFacilityLocation"
+                      class="zones-secondary-btn">
+                <span class="material-symbols-rounded">location_on</span>
+                تحديد الموقع على الخريطة
+              </button>
+
+              <small id="facilityLocationHint">
+                حددي موقع المرفق داخل حدود المنطقة.
+              </small>
+            </div>
+
+            <div class="zones-field">
+              <label for="facilityLatitude">
+                Latitude - اختياري
+              </label>
+              <input type="number"
+                     id="facilityLatitude"
+                     step="any"
+                     min="-90"
+                     max="90"
+                     placeholder="GPS Latitude">
+            </div>
+
+            <div class="zones-field">
+              <label for="facilityLongitude">
+                Longitude - اختياري
+              </label>
+              <input type="number"
+                     id="facilityLongitude"
+                     step="any"
+                     min="-180"
+                     max="180"
+                     placeholder="GPS Longitude">
+            </div>
+
+          </div>
+
+          <div id="facilityFormMessage"
+               class="zones-form-message"
+               role="status"
+               aria-live="polite"
+               hidden></div>
+
+          <div class="zones-form-actions">
+
+            <button type="submit"
+                    id="saveFacilityButton"
+                    class="zones-primary-btn">
+              <span class="material-symbols-rounded">save</span>
+              حفظ المرفق
+            </button>
+
+            <button type="button"
+                    id="cancelFacilityButton"
+                    class="zones-secondary-btn">
+              إلغاء
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+      <!-- END FACILITIES MANAGEMENT -->
+
+
       <!-- ZONES TABLE -->
       <section class="organizer-panel zones-table-panel">
 
