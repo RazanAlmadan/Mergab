@@ -176,11 +176,14 @@ public class PrayerAlertService {
     }
 
     // نسبة الإشغال: 0.0 → 1.0
-    private static double occupancyRatio(Zone zone) {
-        if (zone.getCapacity() == null || zone.getCapacity() == 0 || zone.getInitialVisitors() == null) {
+    private double occupancyRatio(Zone zone) {
+        if (zone.getCapacity() == null || zone.getCapacity() <= 0) {
             return 0;
         }
-        return (double) zone.getInitialVisitors() / zone.getCapacity();
+
+        long current = zoneVisitRepository.countByZone_IdAndCheckOutTimeIsNull(zone.getId());
+
+        return (double) current / zone.getCapacity();
     }
 
     // نفس مستويات الزحمة اللي في الفرونت
@@ -191,7 +194,7 @@ public class PrayerAlertService {
         return "LOW";
     }
 
-    private static PrayerRoomDTO toDTO(Facility room) {
+    private PrayerRoomDTO toDTO(Facility room) {
         Zone zone = room.getZone();
         double ratio = occupancyRatio(zone);
         return new PrayerRoomDTO(

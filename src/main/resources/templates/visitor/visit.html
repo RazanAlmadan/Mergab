@@ -313,11 +313,22 @@
       $("zonesCount").textContent = zones.length;
       $("facilityCount").textContent = facilities.length;
 
-      const capacity = zones.reduce((sum, z) => sum + (Number(z.capacity) || 0), 0);
-      const visitors = zones.reduce((sum, z) => sum + (Number(z.initialVisitors) || 0), 0);
+      const availableZones = zones.filter(
+              z => z.currentCount != null && Number(z.capacity) > 0
+      );
+
+      const capacity = availableZones.reduce(
+              (sum, z) => sum + Number(z.capacity), 0
+      );
+
+      const visitors = availableZones.reduce(
+              (sum, z) => sum + Number(z.currentCount), 0
+      );
 
       $("occupancyCount").textContent =
-              capacity > 0 ? Math.round(visitors / capacity * 100) + "%" : "—";
+              availableZones.length === zones.length && capacity > 0
+                      ? Math.round(visitors / capacity * 100) + "%"
+                      : "—";
 
       if (!facilitiesReady) {
         $("facilityGrid").innerHTML = "";
@@ -417,7 +428,8 @@
     translate();
 
     try {
-      zones = list(await getData("/zone/get"));
+      const savedZones = list(await getData("/zone/get"));
+      zones = await Mergab.withLiveOccupancy(savedZones);
 
       const responses = await Promise.allSettled(
               zones.map(async zone => {
