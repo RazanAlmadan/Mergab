@@ -343,7 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 fill: color,
 
                 "fill-opacity":
-                    snapshot ? 0.42 : 0.16,
+                    snapshot ? 0.20 : 0.08,
 
                 stroke: color,
                 "stroke-width": 1.05,
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 d,
                 fill: "none",
                 stroke: "#FFFFFF",
-                "stroke-width": 1.4,
+                "stroke-width": 1.6,
                 "stroke-linecap": "round",
                 "stroke-linejoin": "round"
             });
@@ -377,8 +377,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 {
                     d,
                     fill: "none",
-                    stroke: "#247C59",
-                    "stroke-width": 0.8,
+                    stroke: "#89d8c9",
+                    "stroke-width": 0.95,
                     "stroke-linecap": "round",
                     "stroke-linejoin": "round"
                 }
@@ -669,6 +669,20 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             drawMapOverlay([]);
+
+            document.dispatchEvent(new CustomEvent(
+                "mergab:simulation-frame",
+                {
+                    detail: {
+                        zones,
+                        rows: [],
+                        connections,
+                        minute: null,
+                        simulation: selectedSimulation
+                    }
+                }
+            ));
+
             return;
         }
 
@@ -842,6 +856,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         drawMapOverlay(rows);
 
+        document.dispatchEvent(new CustomEvent(
+            "mergab:simulation-frame",
+            {
+                detail: {
+                    zones,
+                    rows,
+                    connections,
+                    minute,
+                    simulation: selectedSimulation
+                }
+            }
+        ));
+
         setStatus(`نتائج الدقيقة ${minute}`);
     }
 
@@ -853,9 +880,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (playbackTimer !== null) {
             clearInterval(playbackTimer);
             playbackTimer = null;
-        }
 
-        $("pauseSimulationButton").disabled = true;
+            $("pauseSimulationButton").disabled = true;
+
+            document.dispatchEvent(new CustomEvent(
+                "mergab:simulation-playback",
+                { detail: { playing: false } }
+            ));
+        }
     }
 
     function showMinuteIndex(index) {
@@ -905,6 +937,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000 / speed);
 
         $("pauseSimulationButton").disabled = false;
+
+        document.dispatchEvent(new CustomEvent(
+            "mergab:simulation-playback",
+            { detail: { playing: true } }
+        ));
     }
 
     $("playSimulationButton")
