@@ -6,54 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>سياسة الخصوصية | مِرقاب</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" rel="stylesheet">
+
+    <link rel="icon" href="/img/favicon.png">
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/privacy.css">
+
     <script defer src="/js/base.js"></script>
-
-    <style>
-        .privacy-back {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 24px;
-            padding: 12px 24px;
-            background: #0E5946;
-            color: #FFFFFF !important;
-            border-radius: 12px;
-            text-decoration: none !important;
-            font-weight: 700;
-            transition: background 0.2s ease;
-        }
-
-        .privacy-back:hover {
-            background: #14765B;
-            color: #FFFFFF;
-        }
-        .privacy-main {
-            max-width: 850px;
-            margin: 45px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 18px;
-            line-height: 2;
-        }
-        .privacy-main h1,
-        .privacy-main h2 {
-            color: #0E5946;
-        }
-        .privacy-main h2 {
-            font-size: 20px;
-            margin-top: 25px;
-        }
-        .privacy-main p {
-            color: #52665C;
-        }
-    </style>
 </head>
+
 <body>
 
 <header th:replace="~{fragments/layout :: navbar}"></header>
 
 <main class="privacy-main">
+
     <h1>سياسة الخصوصية في مِرقاب</h1>
     <p>الإصدار 1.0 — آخر تحديث: 17 أكتوبر 2026</p>
 
@@ -113,16 +80,18 @@
     </p>
 
     <h2>7. التواصل بشأن الخصوصية</h2>
+    <p>الجهة المسؤولة: OMNIX TEAM</p>
     <p>
-        الجهة المسؤولة: [OMNIX TEAM]
-    </p>
-    <p>
-        البريد الإلكتروني: [mergab.platform@gmail.com]
+        البريد الإلكتروني:
+        <a href="mailto:mergab.platform@gmail.com">
+            mergab.platform@gmail.com
+        </a>
     </p>
 
     <a href="/register" class="privacy-back">
         العودة إلى التسجيل
     </a>
+
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

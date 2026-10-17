@@ -1,0 +1,74 @@
+
+/* ==========================================
+   MERGAB | PRIVACY POLICY
+   ========================================== */
+
+.privacy-main {
+    max-width: 850px;
+    margin: 45px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 18px;
+    line-height: 2;
+}
+
+.privacy-main h1,
+.privacy-main h2 {
+    color: #0E5946;
+}
+
+.privacy-main h1 {
+    font-size: clamp(26px, 4vw, 36px);
+    margin-bottom: 16px;
+}
+
+.privacy-main h2 {
+    font-size: 20px;
+    margin-top: 25px;
+    margin-bottom: 12px;
+}
+
+.privacy-main p {
+    color: #52665C;
+    margin-bottom: 14px;
+}
+
+.privacy-main a:not(.privacy-back) {
+    color: #0E5946;
+    text-decoration: underline;
+}
+
+.privacy-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    padding: 12px 24px;
+    background: #0E5946;
+    color: #fff;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.privacy-back:hover {
+    background: #14765B;
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .privacy-main {
+        margin: 20px 14px;
+        padding: 22px 18px;
+        border-radius: 15px;
+    }
+
+    .privacy-main h2 {
+        font-size: 18px;
+    }
+
+    .privacy-back {
+        width: 100%;
+    }
+}

@@ -1,0 +1,326 @@
+
+/* ==========================================
+   MERGAB | VISITOR EVENTS PAGE
+   ========================================== */
+
+/* Page layout */
+
+.ve-page {
+    max-width: 1160px;
+    margin: auto;
+    padding: 45px 22px 80px;
+}
+
+.ve-heading {
+    position: relative;
+    overflow: hidden;
+    min-height: 230px;
+    margin-bottom: 28px;
+    padding: 40px 45px;
+    border-radius: 26px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+
+    background:
+            linear-gradient(
+                    270deg,
+                    rgba(6, 34, 29, 0.74) 0%,
+                    rgba(6, 34, 29, 0.35) 55%,
+                    rgba(6, 34, 29, 0.08) 100%
+            ),
+            url('/img/events/events-hero.png');
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.ve-heading h1 {
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 0 0 12px;
+    line-height: 1.4;
+    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.35);
+}
+.ve-heading p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 17px;
+    line-height: 1.9;
+    margin: 0;
+    max-width: 600px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Search and zone selection */
+
+.ve-toolbar {
+    background: #fff;
+    border: 1px solid #e2e9e3;
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.ve-toolbar input,
+.ve-toolbar select {
+    border: 1px solid #d8e1da;
+    border-radius: 11px;
+    padding: 12px 14px;
+    min-height: 46px;
+    background: #fff;
+    font: inherit;
+    color: #0E3D32;
+}
+
+.ve-toolbar input {
+    flex: 2 1 260px;
+}
+
+.ve-toolbar select {
+    flex: 1 1 190px;
+}
+
+.ve-toolbar input:focus,
+.ve-toolbar select:focus {
+    outline: 2px solid #458776;
+    outline-offset: 2px;
+}
+
+/* Time filters */
+
+.ve-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.ve-filters button {
+    border: 1px solid #dae3dc;
+    background: #fff;
+    border-radius: 40px;
+    padding: 10px 20px;
+    font: inherit;
+    cursor: pointer;
+    color: #254c40;
+    transition: background .2s, color .2s;
+}
+
+.ve-filters button:hover {
+    background: #e8f3ed;
+}
+
+.ve-filters button.active {
+    background: #0E3D32;
+    border-color: #0E3D32;
+    color: #fff;
+}
+
+/* Events grid */
+
+.ve-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* Event card */
+
+.ve-card {
+    border: 1px solid #e2e9e3;
+    border-radius: 19px;
+    background: #fff;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.ve-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px #10231d16;
+}
+
+/* Event image */
+
+.ve-card-media {
+    height: 230px;
+    background-color: #286451;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.ve-card-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            180deg,
+            rgba(10, 44, 36, .08),
+            rgba(10, 44, 36, .35)
+    );
+}
+
+/* Event details */
+.ve-card-body {
+    position: relative;
+    z-index: 1;
+    background: #FFFFFF;
+    padding: 23px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    flex: 1;
+}
+
+.ve-card h2 {
+    color: #0E3D32;
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ve-card .meta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #586c60;
+    font-size: 14px;
+}
+
+.ve-card .material-symbols-rounded {
+    font-size: 20px;
+}
+
+.ve-badge {
+    align-self: flex-start;
+    border-radius: 50px;
+    padding: 6px 12px;
+    background: #e8f3ed;
+    color: #165a43;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ve-card a {
+    margin-top: auto;
+    text-align: center;
+}
+
+/* Empty and error messages */
+
+.ve-empty {
+    padding: 55px 20px;
+    text-align: center;
+    color: #61766a;
+    background: #fff;
+    border-radius: 18px;
+}
+
+/* Featured layout when there is only one event */
+
+.ve-grid:has(> .ve-card:only-child) {
+    grid-template-columns: 1fr;
+}
+
+.ve-grid > .ve-card:only-child {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    min-height: 360px;
+    align-items: stretch;
+}
+
+.ve-grid > .ve-card:only-child .ve-card-media {
+    height: 100%;
+    min-height: 360px;
+    background-position: center;
+}
+
+.ve-grid > .ve-card:only-child .ve-card-body {
+    padding: 34px;
+    justify-content: center;
+}
+
+.ve-grid > .ve-card:only-child h2 {
+    font-size: clamp(28px, 3vw, 36px);
+}
+
+.ve-grid > .ve-card:only-child .meta {
+    font-size: 16px;
+}
+
+.ve-grid > .ve-card:only-child .ve-badge {
+    margin-bottom: 10px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 900px) {
+    .ve-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ve-grid > .ve-card:only-child {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        direction: ltr;
+    }
+
+    .ve-grid > .ve-card:only-child .ve-card-media {
+        min-height: 240px;
+        height: 240px;
+    }
+
+    .ve-grid > .ve-card:only-child .ve-card-body {
+        padding: 24px;
+        direction: rtl;
+    }
+}
+
+@media (max-width: 600px) {
+    .ve-page {
+        padding: 30px 16px 60px;
+    }
+
+    .ve-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ve-toolbar {
+        padding: 16px;
+    }
+
+    .ve-card-media {
+        height: 200px;
+    }
+
+    .ve-card-body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .ve-heading {
+        min-height: 220px;
+        padding: 28px 22px;
+        background-position: 40% center;
+    }
+
+    .ve-heading h1 {
+        font-size: 30px;
+    }
+
+    .ve-heading p {
+        font-size: 14px;
+    }
+}

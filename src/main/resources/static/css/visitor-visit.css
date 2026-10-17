@@ -1,0 +1,308 @@
+
+/* Mergab | Visitor Visit Guide */
+
+.vg-page {
+    max-width: 1180px;
+    margin: auto;
+    padding: 40px 22px 80px;
+}
+
+.vg-heading h1 {
+    color: #0e3d32;
+    font-size: clamp(27px, 4vw, 38px);
+    margin: 8px 0;
+}
+
+.vg-muted {
+    color: #68796f;
+}
+
+.vg-section {
+    margin-top: 35px;
+}
+
+.vg-section h2 {
+    color: #0e3d32;
+    margin-bottom: 15px;
+}
+
+.vg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.vg-card {
+    padding: 22px;
+    background: white;
+    border: 1px solid #e1e9e2;
+    border-radius: 17px;
+}
+
+.vg-stat strong {
+    display: block;
+    font-size: 30px;
+    color: #125641;
+}
+
+.vg-stat span {
+    color: #68796f;
+}
+
+.vg-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.vg-toolbar input,
+.vg-toolbar select {
+    border: 1px solid #d8e2db;
+    border-radius: 10px;
+    padding: 11px;
+    font: inherit;
+    background: white;
+    min-width: 0;
+    flex: 1 1 180px;
+}
+
+.vg-toolbar input {
+    flex: 2 1 240px;
+}
+
+.vg-facility h3 {
+    color: #0e3d32;
+    font-size: 18px;
+    margin: 5px 0 12px;
+}
+
+.vg-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #65776b;
+    margin: 9px 0;
+}
+
+.vg-info .material-symbols-rounded {
+    font-size: 19px;
+}
+
+.vg-tag {
+    display: inline-block;
+    background: #e7f2eb;
+    color: #145940;
+    border-radius: 30px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.vg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #0e5946;
+    color: white;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+/* Prayer Times — Unified Card */
+
+/* Prayer Times — Table Style */
+
+.vg-prayers {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: #fff;
+    border: 1px solid #e2e9e3;
+    border-top: 4px solid #C9A86C;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(14, 61, 50, 0.06);
+    width: 100%;
+    max-width: 550px;
+    margin-inline-end: auto;
+}
+
+.vg-prayers .vg-prayer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 19px 28px;
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: start;
+}
+
+.vg-prayers .vg-prayer + .vg-prayer {
+    border-top: 1px solid #e9eee9;
+}
+
+.vg-prayers .vg-prayer:nth-child(even) {
+    background: #fafcf9;
+}
+
+.vg-prayers .vg-prayer span {
+    font-size: 17px;
+    font-weight: 600;
+    color: #536c5c;
+}
+
+.vg-prayers .vg-prayer strong {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0E3D32;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+    .vg-prayers .vg-prayer {
+        padding: 16px 20px;
+    }
+}
+
+.vg-empty {
+    padding: 24px;
+    color: #65776b;
+    background: #f4f7f3;
+    border-radius: 14px;
+}
+
+@media (max-width: 850px) {
+    .vg-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 570px) {
+    .vg-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+}
+
+
+/* Visit Guide Hero */
+
+.vg-heading {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+
+    background:
+            linear-gradient(
+                    270deg,
+                    rgba(7, 39, 32, 0.75) 0%,
+                    rgba(7, 39, 32, 0.38) 55%,
+                    rgba(7, 39, 32, 0.06) 100%
+            ),
+            url('/img/visit/visit-hero.png');
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.vg-heading h1 {
+    color: #fff;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+.vg-heading .vg-muted {
+    color: #f0f5f0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 600px) {
+    .vg-heading {
+        min-height: 280px;
+        padding: 28px 22px;
+        background-position: 38% center;
+    }
+}
+
+/* Visit Guide — Balanced Layout */
+
+.vg-content-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
+    gap: 24px;
+    align-items: start;
+    margin-top: 30px;
+}
+
+.vg-content-layout > .vg-section {
+    min-width: 0;
+    margin-top: 0;
+    padding: 24px;
+    background: #fbfcf9;
+    border: 1px solid #e3eae4;
+    border-radius: 22px;
+}
+
+.vg-content-layout .vg-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.vg-content-layout .vg-toolbar input,
+.vg-content-layout .vg-toolbar select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vg-content-layout #facilityGrid {
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, 250px), 1fr)
+    );
+}
+
+.vg-content-layout .vg-prayers {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.vg-page > .vg-section:first-of-type {
+    margin-top: 25px;
+}
+
+.vg-page > .vg-section:first-of-type .vg-stat {
+    padding: 18px 22px;
+}
+
+/* Tablet and mobile */
+
+@media (max-width: 900px) {
+    .vg-content-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .vg-content-layout > .vg-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 500px) {
+    .vg-content-layout .vg-toolbar {
+        grid-template-columns: 1fr;
+    }
+}

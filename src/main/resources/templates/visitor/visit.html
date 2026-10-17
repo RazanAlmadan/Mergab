@@ -13,73 +13,11 @@
 
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/visitor-refresh.css">
+  <link rel="stylesheet" href="/css/visitor-visit.css">
+
   <script defer src="/js/base.js"></script>
   <script defer src="/js/auth.js"></script>
-
-  <style>
-    .vg-page { max-width: 1180px; margin: auto; padding: 40px 22px 80px; }
-    .vg-heading h1 { color: #0e3d32; font-size: clamp(27px,4vw,38px); margin: 8px 0; }
-    .vg-muted { color: #68796f; }
-    .vg-section { margin-top: 35px; }
-    .vg-section h2 { color: #0e3d32; margin-bottom: 15px; }
-    .vg-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
-    .vg-card {
-      padding: 22px;
-      background: white;
-      border: 1px solid #e1e9e2;
-      border-radius: 17px;
-    }
-    .vg-stat strong { display: block; font-size: 30px; color: #125641; }
-    .vg-stat span { color: #68796f; }
-    .vg-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
-    .vg-toolbar input,.vg-toolbar select {
-      border: 1px solid #d8e2db;
-      border-radius: 10px;
-      padding: 11px;
-      font: inherit;
-      background: white;
-      min-width: 0;
-      flex: 1 1 180px;
-    }
-    .vg-toolbar input { flex: 2 1 240px; }
-    .vg-facility h3 { color: #0e3d32; font-size: 18px; margin: 5px 0 12px; }
-    .vg-info { display: flex; gap: 8px; align-items: center; color: #65776b; margin: 9px 0; }
-    .vg-info .material-symbols-rounded { font-size: 19px; }
-    .vg-tag {
-      display: inline-block;
-      background: #e7f2eb;
-      color: #145940;
-      border-radius: 30px;
-      padding: 5px 12px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .vg-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      background: #0e5946;
-      color: white;
-      border-radius: 10px;
-      padding: 10px 16px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-top: 12px;
-    }
-    .vg-prayers { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; }
-    .vg-prayer { text-align: center; padding: 18px 8px; }
-    .vg-prayer strong { display: block; font-size: 20px; margin-top: 8px; }
-    .vg-empty { padding: 24px; color: #65776b; background: #f4f7f3; border-radius: 14px; }
-    @media(max-width:850px) {
-      .vg-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-      .vg-prayers { grid-template-columns: repeat(3,minmax(0,1fr)); }
-    }
-    @media(max-width:570px) {
-      .vg-grid { grid-template-columns: 1fr; }
-      .vg-prayers { grid-template-columns: repeat(2,minmax(0,1fr)); }
-    }
-  </style>
+  <script defer src="/js/visitor-visit.js"></script>
 </head>
 
 <body>
@@ -87,38 +25,53 @@
 
 <main class="vg-page">
   <div class="vg-heading">
-    <span class="vg-tag" data-v="kicker">دليلك داخل إكسبو</span>
+        <span class="vg-tag" data-v="kicker">
+            دليلك داخل إكسبو
+        </span>
+
     <h1 data-v="title">خلّ زيارتك أسهل مع مِرقاب</h1>
+
     <p class="vg-muted" data-v="subtitle">
       تعرّف على حالة المناطق والمرافق وأوقات الصلاة قبل ما تتحرك.
     </p>
-    <a href="/visitor/map" class="vg-btn" data-v="openMap">افتح الخريطة التفاعلية</a>
+
+    <a href="/visitor/map" class="vg-btn" data-v="openMap">
+      افتح الخريطة التفاعلية
+    </a>
   </div>
 
+  <!-- Expo overview -->
   <section class="vg-section">
     <h2 data-v="overview">نظرة سريعة على المعرض</h2>
+
     <div class="vg-grid">
       <div class="vg-card vg-stat">
         <strong id="zonesCount">—</strong>
         <span data-v="zones">المناطق المسجلة</span>
       </div>
+
       <div class="vg-card vg-stat">
         <strong id="facilityCount">—</strong>
         <span data-v="facilities">المرافق المتاحة</span>
       </div>
+
       <div class="vg-card vg-stat">
         <strong id="occupancyCount">—</strong>
-        <span data-v="occupancy">إجمالي نسبة الإشغال المسجلة</span>
+        <span data-v="occupancy">
+                    إجمالي نسبة الإشغال المسجلة
+                </span>
       </div>
     </div>
   </section>
 
+  <!-- Facilities -->
+  <div class="vg-content-layout">
   <section class="vg-section" id="facilities">
     <h2 data-v="facilityTitle">وين تلقى المرافق؟</h2>
+
     <p class="vg-muted" data-v="facilitySubtitle">
       اختر المنطقة أو نوع المرفق للوصول إليه على الخريطة.
     </p>
-
 
     <div class="vr-facility-shortcuts"
          id="facilityShortcuts"
@@ -158,17 +111,20 @@
         <span class="material-symbols-rounded">logout</span>
         المخارج
       </button>
-
     </div>
 
+    <!-- Facility filters -->
     <div class="vg-toolbar">
-      <input id="facilitySearch" type="search" placeholder="ابحث عن مرفق...">
+      <input id="facilitySearch"
+             type="search"
+             placeholder="ابحث عن مرفق..."
+             aria-label="البحث عن مرفق">
 
-      <select id="zoneFilter">
+      <select id="zoneFilter" aria-label="المنطقة">
         <option value="all">كل المناطق</option>
       </select>
 
-      <select id="typeFilter">
+      <select id="typeFilter" aria-label="نوع المرفق">
         <option value="all">كل المرافق</option>
         <option value="RESTROOM">دورات المياه</option>
         <option value="PRAYER_ROOM">المصليات</option>
@@ -176,7 +132,7 @@
         <option value="ENTRANCE">المداخل</option>
       </select>
 
-      <select id="genderFilter">
+      <select id="genderFilter" aria-label="الجنس">
         <option value="all">الجميع</option>
         <option value="MALE">رجال</option>
         <option value="FEMALE">نساء</option>
@@ -185,377 +141,32 @@
     </div>
 
     <div id="facilityGrid" class="vg-grid"></div>
-    <p id="facilityMessage" class="vg-empty" role="status">
+
+    <p id="facilityMessage"
+       class="vg-empty"
+       role="status">
       جاري تحميل المرافق...
     </p>
   </section>
 
+  <!-- Prayer times -->
   <section class="vg-section" id="prayer">
     <h2 data-v="prayerTitle">أوقات الصلاة اليوم</h2>
+
     <div id="prayerGrid" class="vg-prayers"></div>
-    <p id="prayerMessage" class="vg-muted" role="status">
+
+    <p id="prayerMessage"
+       class="vg-muted"
+       role="status">
       جاري تحميل أوقات الصلاة...
     </p>
+
     <div id="prayerZones"></div>
   </section>
+  </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
-
-<script>
-  document.addEventListener("DOMContentLoaded", async () => {
-
-
-    const $ = id => document.getElementById(id);
-
-    const text = {
-      ar: {
-        kicker: "دليلك داخل إكسبو",
-        title: "خلّ زيارتك أسهل مع مِرقاب",
-        subtitle: "تعرّف على حالة المناطق والمرافق وأوقات الصلاة قبل ما تتحرك.",
-        openMap: "افتح الخريطة التفاعلية",
-        overview: "نظرة سريعة على المعرض",
-        zones: "المناطق المسجلة",
-        facilities: "المرافق المتاحة",
-        occupancy: "إجمالي نسبة الإشغال المسجلة",
-        facilityTitle: "وين تلقى المرافق؟",
-        facilitySubtitle: "اختر المنطقة أو نوع المرفق للوصول إليه على الخريطة.",
-        prayerTitle: "أوقات الصلاة اليوم",
-        prayerZones: "المناطق التي تحتوي على مصليات",
-        search: "ابحث عن مرفق...",
-        allZones: "كل المناطق",
-        allTypes: "كل المرافق",
-        allGenders: "الجميع",
-        RESTROOM: "دورات المياه",
-        PRAYER_ROOM: "مصلى",
-        EXIT: "مخرج",
-        ENTRANCE: "مدخل",
-        MALE: "رجال",
-        FEMALE: "نساء",
-        BOTH: "للجميع",
-        fajr: "الفجر",
-        dhuhr: "الظهر",
-        asr: "العصر",
-        maghrib: "المغرب",
-        isha: "العشاء",
-        route: "اعرض على الخريطة",
-        empty: "ما فيه مرافق مطابقة.",
-        loading: "جاري تحميل المرافق...",
-        error: "تعذر تحميل المرافق.",
-        prayerLoading: "جاري تحميل أوقات الصلاة...",
-        prayerError: "أوقات الصلاة غير متاحة حاليًا من المصدر المباشر."
-      },
-      en: {
-        kicker: "Your Expo Guide",
-        title: "Make your visit easier with Mergab",
-        subtitle: "Explore zones, facilities and prayer times.",
-        openMap: "Open interactive map",
-        overview: "Expo overview",
-        zones: "Recorded zones",
-        facilities: "Available facilities",
-        occupancy: "Recorded overall occupancy",
-        facilityTitle: "Find facilities",
-        facilitySubtitle: "Choose a zone or facility type to find it on the map.",
-        prayerTitle: "Today's prayer times",
-        prayerZones: "Zones with prayer rooms",
-        search: "Search facilities...",
-        allZones: "All zones",
-        allTypes: "All facilities",
-        allGenders: "All",
-        RESTROOM: "Restroom",
-        PRAYER_ROOM: "Prayer room",
-        EXIT: "Exit",
-        ENTRANCE: "Entrance",
-        MALE: "Men",
-        FEMALE: "Women",
-        BOTH: "Everyone",
-        fajr: "Fajr",
-        dhuhr: "Dhuhr",
-        asr: "Asr",
-        maghrib: "Maghrib",
-        isha: "Isha",
-        route: "View on map",
-        empty: "No matching facilities.",
-        loading: "Loading facilities...",
-        error: "Unable to load facilities.",
-        prayerLoading: "Loading prayer times...",
-        prayerError: "Live prayer times are currently unavailable."
-      }
-    };
-
-    const lang = () => Mergab.getLanguage();
-    const tr = key => text[lang()][key] || key;
-
-    const esc = value =>
-            String(value ?? "").replace(/[&<>"']/g, c => ({
-              "&": "&amp;", "<": "&lt;", ">": "&gt;",
-              '"': "&quot;", "'": "&#39;"
-            }[c]));
-
-    let zones = [];
-    let facilities = [];
-    let prayerData = null;
-    let facilitiesReady = false;
-    let facilityFailed = false;
-
-    const typeFilter = $("typeFilter");
-    const zoneFilter = $("zoneFilter");
-    const genderFilter = $("genderFilter");
-    const searchInput = $("facilitySearch");
-
-    async function getData(path) {
-      const response = await fetch("/api/v1" + path, {
-        headers: { Accept: "application/json" },
-        cache: "no-store"
-      });
-      if (!response.ok) throw new Error("API " + response.status);
-      return response.json();
-    }
-
-    function list(value) {
-      if (Array.isArray(value)) return value;
-      if (Array.isArray(value?.data)) return value.data;
-      if (Array.isArray(value?.content)) return value.content;
-      return [];
-    }
-
-    function translate() {
-      document.querySelectorAll("[data-v]").forEach(element => {
-        element.textContent = tr(element.dataset.v);
-      });
-
-      searchInput.placeholder = tr("search");
-
-      const currentZone = zoneFilter.value || "all";
-
-      zoneFilter.innerHTML =
-              `<option value="all">${esc(tr("allZones"))}</option>` +
-              zones.map(z => `<option value="${esc(z.id)}">${esc(z.name)}</option>`).join("");
-
-      zoneFilter.value = zones.some(z => String(z.id) === currentZone)
-              ? currentZone : "all";
-
-      const typeLabels = {
-        all: "allTypes",
-        RESTROOM: "RESTROOM",
-        PRAYER_ROOM: "PRAYER_ROOM",
-        EXIT: "EXIT",
-        ENTRANCE: "ENTRANCE"
-      };
-
-      for (const option of typeFilter.options)
-        option.textContent = tr(typeLabels[option.value] || option.value);
-
-      for (const option of genderFilter.options)
-        option.textContent = tr(option.value === "all" ? "allGenders" : option.value);
-    }
-
-    function renderFacilities() {
-      translate();
-
-      $("zonesCount").textContent = zones.length;
-      $("facilityCount").textContent = facilities.length;
-
-      const availableZones = zones.filter(
-              z => z.currentCount != null && Number(z.capacity) > 0
-      );
-
-      const capacity = availableZones.reduce(
-              (sum, z) => sum + Number(z.capacity), 0
-      );
-
-      const visitors = availableZones.reduce(
-              (sum, z) => sum + Number(z.currentCount), 0
-      );
-
-      $("occupancyCount").textContent =
-              availableZones.length === zones.length && capacity > 0
-                      ? Math.round(visitors / capacity * 100) + "%"
-                      : "—";
-
-      if (!facilitiesReady) {
-        $("facilityGrid").innerHTML = "";
-        $("facilityMessage").hidden = false;
-        $("facilityMessage").textContent = tr(facilityFailed ? "error" : "loading");
-        return;
-      }
-
-      const query = searchInput.value.trim().toLowerCase();
-
-      const result = facilities.filter(f => {
-        if (zoneFilter.value !== "all" &&
-                String(f.zoneId) !== zoneFilter.value) return false;
-
-        if (typeFilter.value !== "all" &&
-                f.type !== typeFilter.value) return false;
-
-        if (genderFilter.value !== "all" &&
-                f.gender !== genderFilter.value) return false;
-
-        const searchText = (f.name + " " + f.zoneName).toLowerCase();
-        return !query || searchText.includes(query);
-      });
-
-      $("facilityGrid").innerHTML = result.map(f => `
-            <article class="vg-card vg-facility">
-                <span class="vg-tag">${esc(tr(f.type))}</span>
-                <h3>${esc(f.name)}</h3>
-
-                <div class="vg-info">
-                    <span class="material-symbols-rounded">location_on</span>
-                    <span>${esc(f.zoneName)}</span>
-                </div>
-
-                <div class="vg-info">
-                    <span class="material-symbols-rounded">groups</span>
-                    <span>${esc(tr(f.gender || "BOTH"))}</span>
-                </div>
-
-                <a class="vg-btn"
-                   href="/visitor/map?zone=${encodeURIComponent(f.zoneId)}">
-                   <span class="material-symbols-rounded">map</span>
-                   ${esc(tr("route"))}
-                </a>
-            </article>
-        `).join("");
-
-      $("facilityMessage").hidden = result.length > 0;
-      $("facilityMessage").textContent = tr("empty");
-    }
-
-    function renderPrayers() {
-      $("prayerGrid").innerHTML = "";
-      $("prayerZones").innerHTML = "";
-
-      if (!prayerData || prayerData.source !== "live") {
-        $("prayerMessage").textContent = tr("prayerError");
-        return;
-      }
-
-      const names = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
-
-      $("prayerGrid").innerHTML = names.map(key => `
-            <div class="vg-card vg-prayer">
-                <span>${esc(tr(key))}</span>
-                <strong dir="ltr">${esc(prayerData.prayers?.[key] || "—")}</strong>
-            </div>
-        `).join("");
-
-      $("prayerMessage").textContent = "";
-
-      const pz = list(prayerData.prayerZones);
-      if (pz.length) {
-        $("prayerZones").innerHTML = `
-                <h3 style="margin:20px 0 10px">${esc(tr("prayerZones"))}</h3>
-                <div class="vg-toolbar">
-                    ${pz.map(z => `
-                        <a class="vg-btn" href="/visitor/map?zone=${encodeURIComponent(z.id)}">
-                            ${esc(z.name)}
-                        </a>
-                    `).join("")}
-                </div>
-            `;
-      }
-    }
-
-    searchInput.addEventListener("input", renderFacilities);
-    zoneFilter.addEventListener("change", renderFacilities);
-    typeFilter.addEventListener("change", renderFacilities);
-    genderFilter.addEventListener("change", renderFacilities);
-
-    document.addEventListener("mergab:languageChanged", () => {
-      renderFacilities();
-      renderPrayers();
-    });
-
-    translate();
-
-    try {
-      const savedZones = list(await getData("/zone/get"));
-      zones = await Mergab.withLiveOccupancy(savedZones);
-
-      const responses = await Promise.allSettled(
-              zones.map(async zone => {
-                const data = await getData(`/facility/get-by-zone/${zone.id}`);
-                return list(data).map(f => ({
-                  ...f,
-                  zoneId: zone.id,
-                  zoneName: zone.name
-                }));
-              })
-      );
-
-      facilities = responses
-              .filter(r => r.status === "fulfilled")
-              .flatMap(r => r.value);
-
-      facilityFailed = responses.some(r => r.status === "rejected");
-      facilitiesReady = !facilityFailed || facilities.length > 0;
-    } catch (error) {
-      console.error("Visit facilities:", error);
-      facilityFailed = true;
-    }
-
-    renderFacilities();
-
-    try {
-      prayerData = await getData("/prayer/today");
-    } catch (error) {
-      console.warn("Prayer times:", error);
-    }
-
-    renderPrayers();
-  });
-</script>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const shortcuts =
-            document.getElementById("facilityShortcuts");
-
-    const typeFilter =
-            document.getElementById("typeFilter");
-
-    if (!shortcuts || !typeFilter) return;
-
-    function syncShortcuts() {
-      shortcuts.querySelectorAll("button[data-type]")
-              .forEach(button => {
-                button.setAttribute(
-                        "aria-pressed",
-                        String(
-                                button.dataset.type === typeFilter.value
-                        )
-                );
-              });
-    }
-
-    shortcuts.addEventListener("click", event => {
-      const button = event.target.closest(
-              "button[data-type]"
-      );
-
-      if (!button) return;
-
-      typeFilter.value = button.dataset.type;
-
-      typeFilter.dispatchEvent(
-              new Event("change", { bubbles: true })
-      );
-
-      syncShortcuts();
-    });
-
-    typeFilter.addEventListener(
-            "change",
-            syncShortcuts
-    );
-
-    syncShortcuts();
-  });
-</script>
-
 
 </body>
 </html>

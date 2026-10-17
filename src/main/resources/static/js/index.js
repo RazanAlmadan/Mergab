@@ -252,17 +252,36 @@
     `;
     }
 
-    function zoneImage(zone) {
-        const slug = String(zone?.name || '')
+    function slugify(value) {
+        return String(value || '')
             .trim()
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '');
+    }
 
+    function zoneImagePath(zone) {
+        const explicit = zone?.imageUrl || zone?.imagePath;
+        if (explicit) return explicit;
+
+        const key =
+            zone?.nameEn ||
+            zone?.englishName ||
+            zone?.slug ||
+            zone?.name;
+
+        const slug = slugify(key);
+
+        return slug
+            ? `/img/zones/${encodeURIComponent(slug)}.jpg`
+            : '/img/zones/main-plaza.jpg';
+    }
+
+    function zoneImage(zone) {
         return `
       background-image:
-        linear-gradient(0deg,rgba(10,44,36,.25),rgba(10,44,36,.05)),
-        url('/img/zones/${encodeURIComponent(slug)}.jpg');
+        linear-gradient(180deg, rgba(9,39,32,.12), rgba(9,39,32,.42)),
+        url('${zoneImagePath(zone)}');
       background-color:#286451;
     `;
     }
@@ -359,7 +378,7 @@
 
             return `
         <article class="event-card">
-          <div class="event-art" style="${zoneImage(zone)}"></div>
+            <div class="event-art" style="${MergabEventImages.getStyle(event)}"></div>
 
           <div class="event-body">
             <h3>${escapeHtml(event.name)}</h3>

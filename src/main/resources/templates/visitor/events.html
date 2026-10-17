@@ -7,146 +7,31 @@
   <title>الفعاليات | مِرقاب</title>
 
   <link rel="icon" href="/img/favicon.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" rel="stylesheet">
 
+  <!-- Shared styles -->
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/mergab.css">
   <link rel="stylesheet" href="/css/visitor-refresh.css">
 
+  <!-- Page styles -->
+  <link rel="stylesheet" href="/css/visitor-events.css">
+
+  <!-- JavaScript -->
   <script defer src="/js/base.js"></script>
-
-  <style>
-    .ve-page {
-      max-width: 1160px;
-      margin: auto;
-      padding: 45px 22px 80px;
-    }
-
-    .ve-heading { margin-bottom: 28px; }
-    .ve-heading h1 {
-      font-size: clamp(28px, 4vw, 40px);
-      color: #0E3D32;
-      margin-bottom: 10px;
-    }
-    .ve-heading p { color: #64776e; }
-
-    .ve-toolbar {
-      background: #fff;
-      border: 1px solid #e2e9e3;
-      border-radius: 18px;
-      padding: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      align-items: center;
-      margin-bottom: 22px;
-    }
-
-    .ve-toolbar input, .ve-toolbar select {
-      border: 1px solid #d8e1da;
-      border-radius: 11px;
-      padding: 12px 14px;
-      min-height: 46px;
-      background: #fff;
-      font: inherit;
-    }
-
-    .ve-toolbar input { flex: 2 1 260px; }
-    .ve-toolbar select { flex: 1 1 190px; }
-
-    .ve-filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 25px;
-    }
-
-    .ve-filters button {
-      border: 1px solid #dae3dc;
-      background: #fff;
-      border-radius: 40px;
-      padding: 10px 20px;
-      font: inherit;
-      cursor: pointer;
-    }
-
-    .ve-filters button.active {
-      background: #0E3D32;
-      color: #fff;
-    }
-
-    .ve-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    .ve-card {
-      border: 1px solid #e2e9e3;
-      border-radius: 19px;
-      background: #fff;
-      overflow: hidden;
-      padding: 23px;
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-    }
-
-    .ve-card h2 {
-      color: #0E3D32;
-      font-size: 20px;
-      line-height: 1.6;
-    }
-
-    .ve-card .meta {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      color: #586c60;
-      font-size: 14px;
-    }
-
-    .ve-card .material-symbols-rounded { font-size: 20px; }
-
-    .ve-badge {
-      align-self: flex-start;
-      border-radius: 50px;
-      padding: 6px 12px;
-      background: #e8f3ed;
-      color: #165a43;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .ve-card a {
-      margin-top: auto;
-      text-align: center;
-    }
-
-    .ve-empty {
-      padding: 55px 20px;
-      text-align: center;
-      color: #61766a;
-      background: #fff;
-      border-radius: 18px;
-    }
-
-    @media (max-width: 900px) {
-      .ve-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-    }
-
-    @media (max-width: 600px) {
-      .ve-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  <script defer src="/js/event-images.js"></script>
+  <script defer src="/js/visitor-events.js"></script>
 </head>
 
 <body>
+
 <header th:replace="~{fragments/layout :: navbar}"></header>
 
 <main class="ve-page">
+
   <div class="ve-heading">
     <h1 id="eventsTitle">فعاليات إكسبو</h1>
     <p id="eventsDescription">
@@ -155,9 +40,11 @@
   </div>
 
   <div class="ve-toolbar">
-    <input id="eventSearch" type="search"
-           placeholder="ابحث عن فعالية أو منطقة..."
-           aria-label="البحث عن فعالية">
+    <input
+            id="eventSearch"
+            type="search"
+            placeholder="ابحث عن فعالية أو منطقة..."
+            aria-label="البحث عن فعالية">
 
     <select id="zoneFilter" aria-label="تصفية حسب المنطقة">
       <option value="all">جميع المناطق</option>
@@ -168,245 +55,36 @@
     <button type="button" data-when="upcoming" class="active">
       القادمة
     </button>
-    <button type="button" data-when="today">اليوم</button>
-    <button type="button" data-when="tomorrow">بكرة</button>
-    <button type="button" data-when="all">الكل</button>
+
+    <button type="button" data-when="today">
+      اليوم
+    </button>
+
+    <button type="button" data-when="tomorrow">
+      بكرة
+    </button>
+
+    <button type="button" data-when="all">
+      الكل
+    </button>
   </div>
 
-  <div id="eventsGrid" class="ve-grid" aria-live="polite"></div>
-  <div id="eventsMessage" class="ve-empty" role="status">
+  <div
+          id="eventsGrid"
+          class="ve-grid"
+          aria-live="polite">
+  </div>
+
+  <div
+          id="eventsMessage"
+          class="ve-empty"
+          role="status">
     جاري تحميل الفعاليات...
   </div>
+
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const $ = id => document.getElementById(id);
-
-    const words = {
-      ar: {
-        title: "فعاليات إكسبو",
-        description: "اكتشف الفعاليات القادمة واختر وجهتك داخل المعرض.",
-        search: "ابحث عن فعالية أو منطقة...",
-        zones: "جميع المناطق",
-        upcoming: "القادمة",
-        today: "اليوم",
-        tomorrow: "بكرة",
-        all: "الكل",
-        live: "تقام الآن",
-        upcomingBadge: "قادمة",
-        finished: "انتهت",
-        onMap: "عرض على الخريطة",
-        empty: "ما فيه فعاليات مطابقة حاليًا.",
-        error: "تعذر تحميل الفعاليات.",
-        loading: "جاري تحميل الفعاليات..."
-      },
-      en: {
-        title: "Expo Events",
-        description: "Discover upcoming events and find your destination.",
-        search: "Search events or zones...",
-        zones: "All zones",
-        upcoming: "Upcoming",
-        today: "Today",
-        tomorrow: "Tomorrow",
-        all: "All",
-        live: "Happening now",
-        upcomingBadge: "Upcoming",
-        finished: "Finished",
-        onMap: "View on map",
-        empty: "No matching events.",
-        error: "Unable to load events.",
-        loading: "Loading events..."
-      }
-    };
-
-    const language = () =>
-            window.Mergab?.getLanguage?.() === "en" ? "en" : "ar";
-
-    const tr = key => words[language()][key];
-
-    const escapeHtml = value =>
-            String(value ?? "").replace(/[&<>"']/g, char => ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;"
-            }[char]));
-
-    const params = new URLSearchParams(location.search);
-
-    let events = [];
-    let zones = [];
-    let loaded = false;
-    let failed = false;
-    let when = ["today", "tomorrow", "all", "upcoming"]
-            .includes(params.get("when"))
-            ? params.get("when") : "upcoming";
-
-    let zoneId = params.get("zone") || "all";
-    let search = params.get("q") || "";
-
-    $("eventSearch").value = search;
-
-    function dateOnly(value) {
-      const date = new Date(value);
-      return [date.getFullYear(), date.getMonth(), date.getDate()].join("-");
-    }
-
-    function render() {
-      const now = new Date();
-      const tomorrow = new Date();
-      tomorrow.setDate(now.getDate() + 1);
-
-      $("eventsTitle").textContent = tr("title");
-      $("eventsDescription").textContent = tr("description");
-      $("eventSearch").placeholder = tr("search");
-
-      $("timeFilters").querySelectorAll("button").forEach(button => {
-        button.textContent = tr(button.dataset.when);
-        button.classList.toggle("active", button.dataset.when === when);
-        button.setAttribute("aria-pressed", String(button.dataset.when === when));
-      });
-
-      $("zoneFilter").innerHTML =
-              `<option value="all">${escapeHtml(tr("zones"))}</option>` +
-              zones.map(z => `<option value="${escapeHtml(z.id)}">${escapeHtml(z.name)}</option>`).join("");
-
-      $("zoneFilter").value = zones.some(z => String(z.id) === zoneId)
-              ? zoneId : "all";
-
-      if (!loaded) {
-        $("eventsMessage").hidden = false;
-        $("eventsMessage").textContent = failed ? tr("error") : tr("loading");
-        return;
-      }
-
-      let result = events.filter(event => {
-        const start = new Date(event.startDateTime);
-        const end = new Date(event.endDateTime);
-
-        if (when === "upcoming" && end < now) return false;
-        if (when === "today" &&
-                !(start <= new Date(new Date(now).setHours(23,59,59,999)) &&
-                        end >= new Date(new Date(now).setHours(0,0,0,0)))) return false;
-
-        if (when === "tomorrow" &&
-                !(start <= new Date(new Date(tomorrow).setHours(23,59,59,999)) &&
-                        end >= new Date(new Date(tomorrow).setHours(0,0,0,0)))) return false;
-
-        if (zoneId !== "all" && String(event.zone?.id) !== zoneId) return false;
-
-        const text = (event.name + " " + (event.zone?.name || "")).toLowerCase();
-        if (search && !text.includes(search.toLowerCase())) return false;
-
-        return true;
-      }).sort((a, b) =>
-              new Date(a.startDateTime) - new Date(b.startDateTime)
-      );
-
-      const locale = language() === "ar" ? "ar-SA" : "en-GB";
-
-      $("eventsGrid").innerHTML = result.map(event => {
-        const start = new Date(event.startDateTime);
-        const end = new Date(event.endDateTime);
-
-        const live = start <= now && end >= now;
-        const finished = end < now;
-
-        const badge = live ? tr("live") :
-                finished ? tr("finished") : tr("upcomingBadge");
-
-        const date = new Intl.DateTimeFormat(locale, {
-          day: "numeric", month: "short", year: "numeric"
-        }).format(start);
-
-        const time = new Intl.DateTimeFormat(locale, {
-          hour: "numeric", minute: "2-digit"
-        });
-
-        return `
-                <article class="ve-card">
-                    <span class="ve-badge">${escapeHtml(badge)}</span>
-
-                    <h2>${escapeHtml(event.name)}</h2>
-
-                    <div class="meta">
-                        <span class="material-symbols-rounded">calendar_month</span>
-                        <span>${escapeHtml(date)}</span>
-                    </div>
-
-                    <div class="meta">
-                        <span class="material-symbols-rounded">schedule</span>
-                        <span>${escapeHtml(time.format(start))} – ${escapeHtml(time.format(end))}</span>
-                    </div>
-
-                    <div class="meta">
-                        <span class="material-symbols-rounded">location_on</span>
-                        <span>${escapeHtml(event.zone?.name || "—")}</span>
-                    </div>
-
-                    <a class="btn btn-primary"
-                       href="/visitor/map?zone=${encodeURIComponent(event.zone?.id ?? "")}">
-                        ${escapeHtml(tr("onMap"))}
-                    </a>
-                </article>
-            `;
-      }).join("");
-
-      $("eventsMessage").hidden = result.length > 0;
-      $("eventsMessage").textContent = tr("empty");
-    }
-
-    $("timeFilters").addEventListener("click", event => {
-      const button = event.target.closest("[data-when]");
-      if (!button) return;
-      when = button.dataset.when;
-      render();
-    });
-
-    $("zoneFilter").addEventListener("change", event => {
-      zoneId = event.target.value;
-      render();
-    });
-
-    $("eventSearch").addEventListener("input", event => {
-      search = event.target.value.trim();
-      render();
-    });
-
-    document.addEventListener("mergab:languageChanged", render);
-
-    async function getList(path) {
-      const response = await fetch("/api/v1" + path, {
-        headers: {Accept: "application/json"},
-        cache: "no-store"
-      });
-
-      if (!response.ok) throw new Error("API " + response.status);
-
-      const data = await response.json();
-      return Array.isArray(data) ? data : (data.data || []);
-    }
-
-    Promise.all([
-      getList("/zone/get"),
-      getList("/expo-event/get")
-    ]).then(([zoneData, eventData]) => {
-      zones = zoneData;
-      events = eventData;
-      loaded = true;
-      render();
-    }).catch(error => {
-      console.error("Visitor events:", error);
-      failed = true;
-      render();
-    });
-
-    render();
-  });
-</script>
 </body>
 </html>

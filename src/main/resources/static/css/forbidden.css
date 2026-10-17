@@ -1,0 +1,68 @@
+
+/* Mergab | Forbidden Page */
+
+.forbidden-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: #f8f7f3;
+    text-align: center;
+}
+
+.forbidden-card {
+    background: #fff;
+    border: 1px solid #e2e8e2;
+    border-radius: 20px;
+    padding: 45px 30px;
+    max-width: 480px;
+    width: 100%;
+}
+
+.forbidden-logo {
+    max-width: 100%;
+    height: auto;
+}
+
+.forbidden-card h1 {
+    color: #0e3d32;
+    margin: 15px 0;
+    font-size: clamp(22px, 4vw, 28px);
+}
+
+.forbidden-card p {
+    color: #64776e;
+    margin-bottom: 25px;
+    line-height: 1.8;
+}
+
+.forbidden-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.forbidden-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: #0e5946;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.forbidden-actions a:hover {
+    background: #14765b;
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .forbidden-card {
+        padding: 32px 20px;
+    }
+}

@@ -859,3 +859,111 @@
 }
 
 .vm-panel .material-symbols-rounded { width: 1em; overflow: hidden; flex: none; }
+
+
+/* Interactive Map Hero */
+
+.map-page .v-map-head {
+    min-height: 260px;
+    margin: 28px 0 24px;
+    padding: 38px 42px;
+    border-radius: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+
+    background:
+            linear-gradient(
+                    270deg,
+                    rgba(8, 45, 36, .97) 0%,
+                    rgba(8, 45, 36, .87) 42%,
+                    rgba(8, 45, 36, .25) 100%
+            ),
+            url('/img/map/map-hero.png');
+
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.map-page .v-map-head .map-eyebrow {
+    color: #E3C58A;
+}
+
+.map-page .v-map-head h1 {
+    color: #FFFFFF;
+    font-size: clamp(30px, 3.5vw, 45px);
+    margin: 0 0 12px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .2);
+}
+
+.map-page .v-map-head p {
+    color: rgba(255, 255, 255, .92);
+    font-size: 16px;
+    line-height: 1.8;
+    max-width: 550px;
+}
+
+.map-page .map-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.map-page .map-jump .chip {
+    background: rgba(255, 255, 255, .13);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, .32);
+    backdrop-filter: blur(6px);
+    border-radius: 30px;
+    transition: background .2s ease;
+}
+
+.map-page .map-jump .chip:hover {
+    background: rgba(255, 255, 255, .26);
+    color: #FFFFFF;
+}
+
+@media (max-width: 900px) {
+    .map-page .v-map-head {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        min-height: 260px;
+        padding: 30px 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .map-page .v-map-head {
+        min-height: 230px;
+        border-radius: 18px;
+        background-position: center;
+    }
+
+    .map-page .v-map-head h1 {
+        font-size: 30px;
+    }
+
+    .map-page .v-map-head p {
+        font-size: 14px;
+    }
+}
+
+/* Map Hero — Actions below description */
+
+.map-page .v-map-head {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 22px;
+}
+
+.map-page .map-jump {
+    align-self: flex-start;
+    justify-content: flex-start;
+    margin: 0;
+    gap: 10px;
+}

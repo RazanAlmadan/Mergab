@@ -7,285 +7,23 @@
   <title>حساب الزائر | مِرقاب</title>
 
   <link rel="icon" href="/img/favicon.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
+
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/visitor-refresh.css">
-
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="/css/visitor-account.css">
 
   <script defer src="/js/base.js"></script>
   <script defer src="/js/auth.js"></script>
-
-  <style>
-    .va-page {
-      max-width: 1100px;
-      margin: auto;
-      padding: 42px 22px 80px;
-      font-family: "IBM Plex Sans Arabic", sans-serif;
-    }
-
-    .va-page [hidden] {
-      display: none !important;
-    }
-
-    .va-heading {
-      margin-bottom: 30px;
-    }
-
-    .va-heading h1 {
-      color: #0E3D32;
-      font-size: clamp(28px, 4vw, 38px);
-      margin-bottom: 10px;
-    }
-
-    .va-muted {
-      color: #64776e;
-      font-size: 14px;
-      line-height: 1.9;
-    }
-
-    /* Account Tabs */
-
-    .va-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      max-width: 800px;
-      margin: 0 auto 22px;
-      padding: 7px;
-      background: #edf2ee;
-      border-radius: 16px;
-    }
-
-    .va-tab {
-      flex: 1 1 170px;
-      padding: 13px 16px;
-      border: none;
-      border-radius: 12px;
-      background: transparent;
-      color: #52665c;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .va-tab:hover {
-      color: #0E5946;
-    }
-
-    .va-tab[aria-selected="true"] {
-      background: white;
-      color: #0E5946;
-      box-shadow: 0 3px 12px rgba(0,0,0,.06);
-    }
-
-    /* Content */
-
-    .va-panel {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .va-card {
-      background: white;
-      border: 1px solid #e5ebe6;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.04);
-    }
-
-    .va-card h2 {
-      color: #0E3D32;
-      font-size: 22px;
-      margin: 0 0 8px;
-    }
-
-    /* QR Card */
-
-    .va-qr-container {
-      max-width: 300px;
-      margin: 26px auto;
-      padding: 18px;
-      border: 1px solid #e3eae4;
-      border-radius: 18px;
-      background: #fff;
-      text-align: center;
-    }
-
-    .va-qr {
-      width: 100%;
-      max-width: 230px;
-      aspect-ratio: 1;
-      object-fit: contain;
-      display: block;
-      margin: auto;
-    }
-
-    .va-qr-container p {
-      color: #64776e;
-      font-size: 14px;
-      margin: 10px 0;
-    }
-
-    .va-actions {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 22px;
-    }
-
-    .va-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 22px;
-      background: #0E5946;
-      color: white;
-      border: none;
-      border-radius: 11px;
-      text-decoration: none;
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .va-btn.secondary {
-      background: #e8f1eb;
-      color: #0E5946;
-    }
-
-    .va-btn:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
-    /* Profile */
-
-    .va-form {
-      max-width: 550px;
-      margin-top: 25px;
-    }
-
-    .va-field {
-      display: block;
-      margin-bottom: 18px;
-    }
-
-    .va-field > span {
-      display: block;
-      color: #263e32;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .va-field input,
-    .va-field select {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px 14px;
-      border: 1px solid #d6e1d9;
-      border-radius: 11px;
-      background: white;
-      font: inherit;
-    }
-
-    .va-field input[readonly] {
-      background: #f5f7f5;
-      color: #64776e;
-    }
-
-    .va-check {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 20px 0;
-    }
-
-    .va-message {
-      margin-top: 16px;
-      color: #0E5946;
-      font-size: 14px;
-    }
-
-    /* History */
-
-    .va-visit {
-      border: 1px solid #e1e9e2;
-      border-radius: 14px;
-      padding: 19px;
-      margin-top: 14px;
-      background: #fcfdfb;
-    }
-
-    .va-visit strong {
-      display: block;
-      color: #0E3D32;
-      font-size: 17px;
-      margin-bottom: 10px;
-    }
-
-    .va-visit p {
-      color: #64776e;
-      margin: 7px 0;
-    }
-
-    .va-status {
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 30px;
-      background: #e8f3ed;
-      color: #0E5946;
-      font-size: 12px;
-      font-weight: 700;
-      margin-top: 10px;
-    }
-
-    /* QR Modal */
-
-    .va-dialog {
-      border: none;
-      border-radius: 20px;
-      padding: 28px;
-      text-align: center;
-      max-width: calc(100vw - 40px);
-    }
-
-    .va-dialog::backdrop {
-      background: rgba(0,0,0,.65);
-    }
-
-    .va-dialog img {
-      width: min(300px, 75vw);
-      display: block;
-      margin: 20px auto;
-    }
-
-    @media(max-width: 600px) {
-      .va-page {
-        padding: 25px 15px 60px;
-      }
-
-      .va-card {
-        padding: 22px;
-      }
-
-      .va-tab {
-        flex: 1 1 100%;
-      }
-    }
-  </style>
+  <script defer src="/js/visitor-account.js"></script>
 </head>
-
 <body>
 
 <header th:replace="~{fragments/layout :: navbar}"></header>
 
 <main class="va-page">
-
   <div class="va-heading">
     <h1>حسابي في مِرقاب</h1>
     <p class="va-muted">
@@ -293,10 +31,8 @@
     </p>
   </div>
 
-  <!-- Navigation Tabs -->
-
+  <!-- Account navigation -->
   <nav class="va-tabs" role="tablist" aria-label="أقسام حساب الزائر">
-
     <button type="button"
             class="va-tab"
             role="tab"
@@ -326,12 +62,9 @@
             aria-selected="false">
       سجل زياراتي
     </button>
-
   </nav>
 
-
-  <!-- TAB 1: DIGITAL CARD -->
-
+  <!-- Digital Card -->
   <section class="va-panel"
            id="panelQr"
            role="tabpanel"
@@ -339,7 +72,6 @@
            data-panel="qr">
 
     <div class="va-card">
-
       <h2>بطاقتي الرقمية</h2>
 
       <p class="va-muted">
@@ -347,7 +79,6 @@
       </p>
 
       <div class="va-qr-container">
-
         <img id="visitorQr"
              class="va-qr"
              alt="رمز QR الخاص بالزائر"
@@ -356,11 +87,9 @@
         <p id="qrLoading">
           جارٍ تحميل بطاقتك الرقمية...
         </p>
-
       </div>
 
       <div class="va-actions">
-
         <button type="button"
                 id="expandQr"
                 class="va-btn"
@@ -374,15 +103,11 @@
            hidden>
           حفظ البطاقة
         </a>
-
       </div>
-
     </div>
   </section>
 
-
-  <!-- TAB 2: PROFILE -->
-
+  <!-- Profile -->
   <section class="va-panel"
            id="panelInfo"
            role="tabpanel"
@@ -391,27 +116,20 @@
            hidden>
 
     <div class="va-card">
-
       <h2 id="visitorGreeting">معلوماتي الشخصية</h2>
-
       <p class="va-muted">
         عرض بياناتك وتعديل رقم الجوال وتفضيلاتك.
       </p>
 
       <form id="visitorInfoForm" class="va-form">
-
         <label class="va-field">
           <span>الاسم الكامل</span>
-          <input id="visitorName"
-                 type="text"
-                 readonly>
+          <input id="visitorName" type="text" readonly>
         </label>
 
         <label class="va-field">
           <span>البريد الإلكتروني</span>
-          <input id="visitorEmail"
-                 type="email"
-                 readonly>
+          <input id="visitorEmail" type="email" readonly>
         </label>
 
         <label class="va-field">
@@ -426,7 +144,6 @@
 
         <label class="va-field">
           <span>الجنس</span>
-
           <select id="visitorGender" required>
             <option value="MALE">ذكر</option>
             <option value="FEMALE">أنثى</option>
@@ -446,23 +163,18 @@
 
         <button type="button"
                 id="deleteMyAccount"
-                class="va-btn"
-                style="background:#B42318;margin-top:16px">
+                class="va-btn danger">
           حذف حسابي نهائيًا
         </button>
 
         <p id="visitorMessage"
            class="va-message"
            role="status"></p>
-
       </form>
-
     </div>
   </section>
 
-
-  <!-- TAB 3: VISIT HISTORY -->
-
+  <!-- Visit History -->
   <section class="va-panel"
            id="panelHistory"
            role="tabpanel"
@@ -471,9 +183,7 @@
            hidden>
 
     <div class="va-card">
-
       <h2>سجل زياراتي</h2>
-
       <p class="va-muted">
         المناطق التي زرتها وأوقات الدخول والخروج المسجلة.
       </p>
@@ -481,414 +191,22 @@
       <div id="myVisits">
         جارٍ تحميل سجل الزيارات...
       </div>
-
     </div>
-
   </section>
-
 </main>
 
-
-<!-- QR Preview Modal -->
-
+<!-- QR enlargement -->
 <dialog id="qrDialog" class="va-dialog">
-
   <h2>بطاقتك الرقمية</h2>
 
   <img id="visitorQrLarge" alt="رمز QR مكبّر">
 
-  <button type="button"
-          id="closeQr"
-          class="va-btn">
+  <button type="button" id="closeQr" class="va-btn">
     إغلاق
   </button>
-
 </dialog>
 
-
 <footer th:replace="~{fragments/layout :: footer}"></footer>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-
-    const session = MergabAuth.requireRole(["VISITOR"]);
-    if (!session) return;
-
-    const $ = id => document.getElementById(id);
-
-    let qrObjectUrl = null;
-    let profileLoaded = false;
-
-
-    // ======================================
-    // ACCOUNT TABS
-    // ======================================
-
-    document.querySelectorAll("[data-tab]").forEach(tab => {
-
-      tab.addEventListener("click", () => {
-
-        const selected = tab.dataset.tab;
-
-        document.querySelectorAll("[data-tab]").forEach(button => {
-          button.setAttribute(
-                  "aria-selected",
-                  String(button.dataset.tab === selected)
-          );
-        });
-
-        document.querySelectorAll("[data-panel]").forEach(panel => {
-          panel.hidden = panel.dataset.panel !== selected;
-        });
-
-      });
-
-    });
-
-
-    // ======================================
-    // AUTHENTICATED API REQUESTS
-    // ======================================
-
-    async function request(path, options = {}) {
-
-      const isQr = path === "/visitor/my-qr-code";
-
-      const response = await fetch("/api/v1" + path, {
-
-        ...options,
-
-        headers: {
-          Authorization: session.token,
-
-          // QR endpoint returns PNG, not JSON.
-          Accept: isQr ? "image/png" : "application/json",
-
-          ...(options.body
-                  ? { "Content-Type": "application/json" }
-                  : {}),
-
-          ...(options.headers || {})
-        },
-
-        cache: "no-store"
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        throw new Error("انتهت صلاحية الدخول أو ليس لديك صلاحية.");
-      }
-
-      if (!response.ok) {
-        throw new Error(
-                "تعذر إكمال العملية. رمز الخطأ: " + response.status
-        );
-      }
-
-      return response;
-    }
-
-
-    // ======================================
-    // LOAD PROFILE
-    // ======================================
-
-    async function loadProfile() {
-
-      try {
-
-        const response = await request("/user/my-account");
-        const user = await response.json();
-
-        $("visitorGreeting").textContent =
-                "أهلًا، " + (user.fullName || "زائر مِرقاب");
-
-        $("visitorName").value = user.fullName || "";
-        $("visitorEmail").value = user.email || "";
-
-        $("visitorPhone").value =
-                user.visitor?.phoneNumber || "";
-
-        $("visitorGender").value =
-                user.visitor?.gender || "MALE";
-
-        $("showPrayerTimes").checked =
-                user.visitor?.showPrayerTimes === true;
-
-        profileLoaded = Boolean(user.visitor);
-
-        if (!profileLoaded) {
-          throw new Error("لم يتم العثور على بيانات الزائر.");
-        }
-
-      } catch (error) {
-
-        $("visitorMessage").textContent = error.message;
-        console.error("Visitor profile:", error);
-
-      }
-    }
-
-
-    // ======================================
-    // LOAD VISITOR QR
-    // ======================================
-
-    async function loadQr() {
-
-      try {
-
-        const response = await request(
-                "/visitor/my-qr-code"
-        );
-
-        const blob = await response.blob();
-
-        if (!blob.size || !blob.type.includes("image/png")) {
-          throw new Error("استجابة QR غير صالحة.");
-        }
-
-        qrObjectUrl = URL.createObjectURL(blob);
-
-        $("visitorQr").src = qrObjectUrl;
-        $("visitorQrLarge").src = qrObjectUrl;
-
-        $("visitorQr").hidden = false;
-        $("qrLoading").hidden = true;
-
-        $("expandQr").disabled = false;
-
-        $("downloadQr").href = qrObjectUrl;
-        $("downloadQr").hidden = false;
-
-      } catch (error) {
-
-        $("visitorQr").hidden = true;
-
-        $("qrLoading").hidden = false;
-        $("qrLoading").textContent =
-                "تعذر تحميل QR: " + error.message;
-
-        console.error("Visitor QR:", error);
-
-      }
-    }
-
-
-    // ======================================
-    // QR ACTIONS
-    // ======================================
-
-    $("expandQr").addEventListener("click", () => {
-
-      if (qrObjectUrl) {
-        $("qrDialog").showModal();
-      }
-
-    });
-
-    $("closeQr").addEventListener("click", () => {
-      $("qrDialog").close();
-    });
-
-
-    // ======================================
-    // UPDATE VISITOR INFO
-    // ======================================
-
-    $("visitorInfoForm").addEventListener(
-            "submit",
-            async event => {
-
-              event.preventDefault();
-
-              if (!profileLoaded) return;
-
-              const button = $("saveVisitor");
-
-              button.disabled = true;
-
-              $("visitorMessage").textContent = "جارٍ الحفظ...";
-
-              try {
-
-                await request("/visitor/update-my-info", {
-
-                  method: "PUT",
-
-                  body: JSON.stringify({
-
-                    phoneNumber: $("visitorPhone").value.trim(),
-
-                    gender: $("visitorGender").value,
-
-                    showPrayerTimes:
-                    $("showPrayerTimes").checked
-                  })
-                });
-
-                $("visitorMessage").textContent =
-                        "تم حفظ التغييرات بنجاح.";
-
-              } catch (error) {
-
-                $("visitorMessage").textContent = error.message;
-
-              } finally {
-
-                button.disabled = false;
-
-              }
-            }
-    );
-
-
-    // ======================================
-    // VISIT HISTORY
-    // ======================================
-
-    const escapeHtml = value =>
-            String(value ?? "").replace(/[&<>"']/g, char => ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;"
-            }[char]));
-
-
-    function formatDate(value) {
-
-      if (!value) return "—";
-
-      const date = new Date(value);
-
-      if (Number.isNaN(date.getTime())) return "—";
-
-      return date.toLocaleString("ar-SA", {
-        dateStyle: "medium",
-        timeStyle: "short"
-      });
-    }
-
-
-    async function loadHistory() {
-
-      const container = $("myVisits");
-
-      try {
-
-        const response = await request(
-                "/zone-visit/my-history"
-        );
-
-        const data = await response.json();
-
-        const visits = Array.isArray(data)
-                ? data
-                : Array.isArray(data?.data)
-                        ? data.data
-                        : [];
-
-        if (!visits.length) {
-
-          container.textContent =
-                  "ما عندك زيارات مسجلة حتى الآن.";
-
-          return;
-        }
-
-        visits.sort((a, b) =>
-                new Date(b.checkInTime) -
-                new Date(a.checkInTime)
-        );
-
-        container.innerHTML = visits.map(visit => `
-
-                <article class="va-visit">
-
-                    <strong>
-                        ${escapeHtml(visit.zoneName || "منطقة")}
-                    </strong>
-
-                    <p>
-                        الدخول:
-                        ${formatDate(visit.checkInTime)}
-                    </p>
-
-                    <p>
-                        الخروج:
-                        ${visit.checkOutTime
-                ? formatDate(visit.checkOutTime)
-                : "ما زال داخل المنطقة"}
-                    </p>
-
-                    <span class="va-status">
-                        ${visit.checkOutTime
-                ? "زيارة مكتملة"
-                : "زيارة نشطة"}
-                    </span>
-
-                </article>
-
-            `).join("");
-
-      } catch (error) {
-
-        console.error("Visit history:", error);
-
-        container.textContent =
-                "تعذر تحميل سجل الزيارات.";
-
-      }
-    }
-
-    $("deleteMyAccount").addEventListener("click", async () => {
-
-      const confirmed = confirm(
-              "هل أنت متأكد من حذف حسابك وبياناتك وسجل زياراتك نهائيًا؟"
-      );
-
-      if (!confirmed) return;
-
-      const button = $("deleteMyAccount");
-      button.disabled = true;
-
-      try {
-        await request("/user/delete-my-account", {
-          method: "DELETE"
-        });
-
-        MergabAuth.logout();
-
-      } catch (error) {
-        $("visitorMessage").textContent =
-                "تعذر حذف الحساب: " + error.message;
-
-        button.disabled = false;
-      }
-    });
-
-
-    // ======================================
-    // INITIALIZE
-    // ======================================
-
-    loadProfile();
-    loadQr();
-    loadHistory();
-
-
-    window.addEventListener("beforeunload", () => {
-
-      if (qrObjectUrl) {
-        URL.revokeObjectURL(qrObjectUrl);
-      }
-
-    });
-
-  });
-</script>
 
 </body>
 </html>
