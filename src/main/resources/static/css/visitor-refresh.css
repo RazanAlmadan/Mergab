@@ -1,0 +1,542 @@
+
+/* =========================================
+   MERGAB — VISITOR EXPERIENCE REFRESH
+   Homepage / Events / Visit / Account
+   ========================================= */
+
+:root {
+    --vr-deep: #0e3d32;
+    --vr-green: #176b50;
+    --vr-gold: #d6ad68;
+    --vr-cream: #fbf9f3;
+    --vr-muted: #687d70;
+    --vr-border: #e1e9e1;
+    --vr-shadow: 0 14px 36px rgba(12, 53, 38, .08);
+}
+
+/* Shared presentation */
+
+:is(.ve-page, .vg-page, .va-page) {
+    position: relative;
+}
+
+:is(.ve-page, .vg-page, .va-page) h1,
+:is(.ve-page, .vg-page, .va-page) h2 {
+    letter-spacing: -.35px;
+}
+
+:is(.ve-page, .vg-page, .va-page) button,
+:is(.ve-page, .vg-page, .va-page) a,
+.home-hero a {
+    transition:
+            transform .25s ease,
+            box-shadow .25s ease,
+            background .25s ease,
+            border-color .25s ease;
+}
+
+:is(.ve-page, .vg-page, .va-page)
+:is(button, a):focus-visible {
+    outline: 3px solid var(--vr-gold);
+    outline-offset: 3px;
+}
+
+/* =========================================
+   HOMEPAGE
+   ========================================= */
+
+.home-hero {
+    min-height: 610px;
+    background:
+            linear-gradient(
+                    100deg,
+                    rgba(5, 30, 22, .94),
+                    rgba(12, 65, 47, .74) 56%,
+                    rgba(11, 47, 35, .43)
+            ),
+            url('/img/hero.jpg') center / cover;
+}
+
+.home-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+            radial-gradient(
+                    circle at 77% 30%,
+                    rgba(221, 180, 107, .18),
+                    transparent 34%
+            );
+}
+
+.home-hero h1 {
+    font-weight: 700;
+    letter-spacing: -1px;
+    text-shadow: 0 5px 30px rgba(0,0,0,.14);
+}
+
+.hero-eyebrow {
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.30);
+    backdrop-filter: blur(12px);
+}
+
+.hero-search {
+    border: 1px solid rgba(255,255,255,.8);
+    border-radius: 19px;
+    box-shadow:
+            0 20px 55px rgba(0,0,0,.24),
+            0 0 0 5px rgba(255,255,255,.07);
+}
+
+.hero-search:focus-within {
+    box-shadow:
+            0 20px 55px rgba(0,0,0,.20),
+            0 0 0 5px rgba(214,173,104,.22);
+}
+
+.hero-shortcuts a {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.28);
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+}
+
+.hero-shortcuts a:hover {
+    background: rgba(214,173,104,.23);
+    border-color: var(--vr-gold);
+    transform: translateY(-3px);
+}
+
+.feature-card,
+.zone-card,
+.event-card {
+    border-color: var(--vr-border);
+    box-shadow: var(--vr-shadow);
+}
+
+.feature-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(
+            90deg,
+            var(--vr-green),
+            var(--vr-gold)
+    );
+}
+
+.feature-card:hover,
+.zone-card:hover,
+.event-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 24px 48px rgba(12,53,38,.15);
+}
+
+.feature-icon {
+    border-radius: 18px;
+}
+
+.zone-card,
+.event-card {
+    border-radius: 21px;
+}
+
+/* =========================================
+   VISITOR EVENTS
+   ========================================= */
+
+.ve-heading {
+    position: relative;
+    overflow: hidden;
+    padding: 35px 38px;
+    margin-bottom: 25px;
+    border-radius: 24px;
+    background:
+            radial-gradient(
+                    circle at 85% 15%,
+                    rgba(214,173,104,.19),
+                    transparent 35%
+            ),
+            linear-gradient(120deg, #0b3026, #16634b);
+}
+
+.ve-heading::after {
+    content: "";
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    border: 30px solid rgba(214,173,104,.12);
+    border-radius: 50%;
+    left: -65px;
+    bottom: -110px;
+    pointer-events: none;
+}
+
+.ve-heading h1 {
+    color: #fff;
+    margin: 0 0 10px;
+}
+
+.ve-heading p {
+    color: #d4e8dc;
+    line-height: 1.9;
+    margin: 0;
+}
+
+.ve-toolbar {
+    border-radius: 18px;
+    box-shadow: var(--vr-shadow);
+}
+
+.ve-toolbar input:focus,
+.ve-toolbar select:focus {
+    outline: none;
+    border-color: var(--vr-green);
+    box-shadow: 0 0 0 3px rgba(23,107,80,.12);
+}
+
+.ve-filters button {
+    font-weight: 600;
+}
+
+.ve-filters button:hover:not(.active) {
+    background: #edf5ef;
+    border-color: #a6c9b7;
+}
+
+.ve-filters button.active {
+    background: var(--vr-deep);
+    border-color: var(--vr-deep);
+    box-shadow: 0 7px 17px rgba(14,61,50,.20);
+}
+
+.ve-card {
+    position: relative;
+    padding: 25px;
+    border-radius: 22px;
+    border-color: var(--vr-border);
+    box-shadow: var(--vr-shadow);
+    transition: transform .25s, box-shadow .25s;
+}
+
+.ve-card::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(
+            to bottom,
+            var(--vr-gold),
+            var(--vr-green)
+    );
+}
+
+.ve-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 45px rgba(12,53,38,.14);
+}
+
+.ve-card h2 {
+    font-size: 21px;
+    line-height: 1.6;
+}
+
+.ve-badge {
+    background: #e9f3e9;
+    color: var(--vr-green);
+}
+
+.ve-card .meta {
+    line-height: 1.7;
+}
+
+.ve-card .meta .material-symbols-rounded {
+    color: var(--vr-green);
+}
+
+.ve-card a {
+    border-radius: 12px;
+}
+
+/* =========================================
+   VISIT GUIDE
+   ========================================= */
+
+.vg-heading {
+    position: relative;
+    padding: 36px 38px;
+    border-radius: 24px;
+    background:
+            radial-gradient(
+                    circle at 88% 12%,
+                    rgba(214,173,104,.18),
+                    transparent 32%
+            ),
+            linear-gradient(125deg, #0b3026, #17654a);
+}
+
+.vg-heading h1 {
+    color: #fff;
+}
+
+.vg-heading .vg-muted {
+    color: #d9eadf;
+    line-height: 1.9;
+}
+
+.vg-heading .vg-tag {
+    background: rgba(214,173,104,.2);
+    border: 1px solid rgba(214,173,104,.45);
+    color: #ffe0a0;
+}
+
+.vg-heading .vg-btn {
+    background: #e1b972;
+    color: #173c30;
+}
+
+.vg-heading .vg-btn:hover {
+    background: #f1ca89;
+    transform: translateY(-2px);
+}
+
+.vg-section {
+    scroll-margin-top: 100px;
+}
+
+.vg-section h2 {
+    font-size: clamp(21px, 2.5vw, 27px);
+}
+
+.vg-card {
+    border-color: var(--vr-border);
+    box-shadow: var(--vr-shadow);
+    transition: transform .25s, box-shadow .25s;
+}
+
+.vg-facility:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 38px rgba(12,53,38,.13);
+}
+
+.vg-stat {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(140deg, #fff, #f5faf5);
+}
+
+.vg-stat::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(
+            90deg,
+            var(--vr-green),
+            var(--vr-gold)
+    );
+}
+
+.vg-stat strong {
+    font-size: 34px;
+}
+
+.vg-toolbar input,
+.vg-toolbar select {
+    min-height: 46px;
+    border-radius: 12px;
+}
+
+.vg-toolbar :is(input, select):focus {
+    outline: none;
+    border-color: var(--vr-green);
+    box-shadow: 0 0 0 3px rgba(23,107,80,.12);
+}
+
+.vg-facility .vg-btn:hover {
+    background: #197653;
+    transform: translateY(-2px);
+}
+
+/* Facility shortcuts */
+
+.vr-facility-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 18px 0;
+}
+
+.vr-facility-shortcuts button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #d7e6dc;
+    border-radius: 999px;
+    padding: 10px 15px;
+    background: #fff;
+    color: #285640;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vr-facility-shortcuts button:hover {
+    border-color: var(--vr-green);
+    background: #eef7f0;
+}
+
+.vr-facility-shortcuts button[aria-pressed="true"] {
+    background: var(--vr-deep);
+    border-color: var(--vr-deep);
+    color: #fff;
+}
+
+.vr-facility-shortcuts .material-symbols-rounded {
+    font-size: 19px;
+}
+
+/* =========================================
+   VISITOR ACCOUNT
+   ========================================= */
+
+.va-heading {
+    padding: 31px 36px;
+    border-radius: 23px;
+    background:
+            radial-gradient(
+                    circle at 86% 12%,
+                    rgba(214,173,104,.20),
+                    transparent 34%
+            ),
+            linear-gradient(120deg, #0b3026, #17644a);
+}
+
+.va-heading h1 {
+    color: #fff;
+    margin-top: 0;
+}
+
+.va-heading .va-muted {
+    color: #d7e9df;
+}
+
+.va-tabs {
+    border: 1px solid #e0e9e1;
+    background: #eaf1eb;
+    border-radius: 18px;
+    padding: 7px;
+}
+
+.va-tab {
+    border-radius: 13px;
+}
+
+.va-tab[aria-selected="true"] {
+    background: var(--vr-deep);
+    color: #fff;
+    box-shadow: 0 7px 18px rgba(14,61,50,.18);
+}
+
+.va-card {
+    border-color: var(--vr-border);
+    border-radius: 23px;
+    box-shadow: var(--vr-shadow);
+}
+
+.va-qr-container {
+    padding: 26px;
+    border: 2px solid rgba(214,173,104,.55);
+    border-radius: 24px;
+    background:
+            linear-gradient(140deg, #fff, #fffdf7);
+    box-shadow: 0 12px 36px rgba(14,61,50,.08);
+}
+
+.va-qr {
+    padding: 10px;
+    border-radius: 12px;
+    background: white;
+}
+
+.va-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 20px rgba(14,61,50,.17);
+}
+
+.va-visit {
+    border-radius: 16px;
+    border-color: var(--vr-border);
+    background: #fcfdf9;
+}
+
+.va-field input:focus,
+.va-field select:focus {
+    outline: none;
+    border-color: var(--vr-green);
+    box-shadow: 0 0 0 3px rgba(23,107,80,.12);
+}
+
+/* Responsive */
+
+@media (max-width: 650px) {
+    .home-hero {
+        min-height: 540px;
+    }
+
+    .ve-heading,
+    .vg-heading,
+    .va-heading {
+        padding: 25px 21px;
+        border-radius: 18px;
+    }
+
+    .ve-card {
+        padding: 21px;
+    }
+
+    .vg-stat strong {
+        font-size: 28px;
+    }
+
+    .vr-facility-shortcuts {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        scrollbar-width: thin;
+    }
+
+    .vr-facility-shortcuts button {
+        flex: 0 0 auto;
+    }
+
+    .va-qr-container {
+        padding: 17px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .feature-card,
+    .zone-card,
+    .event-card,
+    .ve-card,
+    .vg-card,
+    .va-btn {
+        transition: none;
+    }
+}

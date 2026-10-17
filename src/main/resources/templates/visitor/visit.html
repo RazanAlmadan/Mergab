@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&display=block" rel="stylesheet">
 
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/visitor-refresh.css">
   <script defer src="/js/base.js"></script>
   <script defer src="/js/auth.js"></script>
 
@@ -117,6 +118,48 @@
     <p class="vg-muted" data-v="facilitySubtitle">
       اختر المنطقة أو نوع المرفق للوصول إليه على الخريطة.
     </p>
+
+
+    <div class="vr-facility-shortcuts"
+         id="facilityShortcuts"
+         aria-label="اختصارات المرافق">
+
+      <button type="button"
+              data-type="all"
+              aria-pressed="true">
+        <span class="material-symbols-rounded">apps</span>
+        كل المرافق
+      </button>
+
+      <button type="button"
+              data-type="RESTROOM"
+              aria-pressed="false">
+        <span class="material-symbols-rounded">wc</span>
+        دورات المياه
+      </button>
+
+      <button type="button"
+              data-type="PRAYER_ROOM"
+              aria-pressed="false">
+        <span class="material-symbols-rounded">mosque</span>
+        المصليات
+      </button>
+
+      <button type="button"
+              data-type="ENTRANCE"
+              aria-pressed="false">
+        <span class="material-symbols-rounded">login</span>
+        المداخل
+      </button>
+
+      <button type="button"
+              data-type="EXIT"
+              aria-pressed="false">
+        <span class="material-symbols-rounded">logout</span>
+        المخارج
+      </button>
+
+    </div>
 
     <div class="vg-toolbar">
       <input id="facilitySearch" type="search" placeholder="ابحث عن مرفق...">
@@ -464,5 +507,55 @@
     renderPrayers();
   });
 </script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const shortcuts =
+            document.getElementById("facilityShortcuts");
+
+    const typeFilter =
+            document.getElementById("typeFilter");
+
+    if (!shortcuts || !typeFilter) return;
+
+    function syncShortcuts() {
+      shortcuts.querySelectorAll("button[data-type]")
+              .forEach(button => {
+                button.setAttribute(
+                        "aria-pressed",
+                        String(
+                                button.dataset.type === typeFilter.value
+                        )
+                );
+              });
+    }
+
+    shortcuts.addEventListener("click", event => {
+      const button = event.target.closest(
+              "button[data-type]"
+      );
+
+      if (!button) return;
+
+      typeFilter.value = button.dataset.type;
+
+      typeFilter.dispatchEvent(
+              new Event("change", { bubbles: true })
+      );
+
+      syncShortcuts();
+    });
+
+    typeFilter.addEventListener(
+            "change",
+            syncShortcuts
+    );
+
+    syncShortcuts();
+  });
+</script>
+
+
 </body>
 </html>
