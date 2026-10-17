@@ -67,52 +67,77 @@
         </span>
   </div>
 
-  <div class="v-map-grid">
+  <div class="v-map-grid vm-grid">
 
-    <nav class="card layer-list" id="layers"
-         aria-label="مناطق إكسبو">
-      <p class="map-empty">جاري تحميل المناطق...</p>
-    </nav>
+    <!-- Visitor route panel (same design as the demo) -->
+    <aside class="card vm-panel" aria-labelledby="vmTitle">
+
+      <h2 id="vmTitle" class="vm-title" data-i="whereTo">إلى أين تريد الذهاب؟</h2>
+      <p class="vm-sub" data-i="whereToSub">
+        اختر وجهتك ونرسم لك أذكى مسار، ونبعدك عن الزحام لحظة بلحظة.
+      </p>
+
+      <div class="vm-lbl">
+        <span class="material-symbols-rounded" aria-hidden="true">my_location</span>
+        <span data-i="myLocation">موقعي الحالي</span>
+      </div>
+
+      <label class="vm-field">
+        <span class="material-symbols-rounded" aria-hidden="true">radio_button_checked</span>
+        <select id="startSel" aria-label="نقطة البداية"></select>
+      </label>
+
+      <div class="vm-loc-btns">
+        <button type="button" class="vm-chip-btn" id="pickMyLocation">
+          <span class="material-symbols-rounded" aria-hidden="true">location_on</span>
+          <span data-i="pickExact">حدد مكاني على الخريطة</span>
+        </button>
+        <button type="button" class="vm-chip-btn" id="gpsMyLocation">
+          <span class="material-symbols-rounded" aria-hidden="true">gps_fixed</span>
+          GPS
+        </button>
+      </div>
+
+      <small id="myLocationStatus" class="vm-status" role="status">
+        يمكنك تحديد مكان وقوفك يدويًا.
+      </small>
+
+      <div class="vm-lbl">
+        <span class="material-symbols-rounded" aria-hidden="true">place</span>
+        <span data-i="zonesLbl">المناطق</span>
+      </div>
+
+      <nav class="vm-dest-grid" id="layers" aria-label="مناطق إكسبو">
+        <p class="map-empty">جاري تحميل المناطق...</p>
+      </nav>
+
+      <div class="vm-lbl">
+        <span class="material-symbols-rounded" aria-hidden="true">near_me</span>
+        <span data-i="nearestLbl">الأقرب إليّ</span>
+      </div>
+
+      <div class="vm-quick" id="vmQuick"></div>
+
+      <div class="vm-fac-row">
+        <select id="facilityDest" aria-label="المرفق المطلوب">
+          <option value="">حددي موقعك أولًا</option>
+        </select>
+        <button type="button" class="vm-chip-btn" id="findFacilityRouteBtn">
+          <span class="material-symbols-rounded" aria-hidden="true">route</span>
+          <span data-i="go">اذهب</span>
+        </button>
+      </div>
+
+      <small id="facilityRouteStatus" class="vm-status" role="status"></small>
+
+      <div class="route-note" id="routeNote" hidden></div>
+
+    </aside>
 
     <div class="map-main-column">
 
       <div id="map" class="v-map"
            aria-label="خريطة إكسبو التفاعلية">
-      </div>
-
-      <div class="map-location-tools">
-        <button type="button"
-                class="btn btn-primary"
-                id="pickMyLocation">
-          <span class="material-symbols-rounded">location_on</span>
-          تحديد موقعي على الخريطة
-        </button>
-        <button type="button" class="btn btn-primary" id="gpsMyLocation">
-          <span class="material-symbols-rounded">my_location</span>
-          تحديد موقعي GPS
-        </button>
-
-        <span id="myLocationStatus" role="status">
-        يمكنك تحديد مكان وقوفك يدويًا.
-    </span>
-      </div>
-
-      <div class="map-location-tools">
-        <label class="field">
-          <span>المرفق المطلوب</span>
-          <select id="facilityDest">
-            <option value="">حددي موقعك أولًا</option>
-          </select>
-        </label>
-
-        <button type="button"
-                class="btn btn-primary"
-                id="findFacilityRouteBtn">
-          <span class="material-symbols-rounded">route</span>
-          اعرض مسار المرفق
-        </button>
-
-        <span id="facilityRouteStatus" role="status"></span>
       </div>
 
       <section class="card sel-card"
@@ -121,8 +146,8 @@
                hidden>
 
         <div class="sel-name">
-                    <span class="material-symbols-rounded"
-                          aria-hidden="true">location_on</span>
+          <span class="material-symbols-rounded"
+                aria-hidden="true">location_on</span>
 
           <div>
             <strong id="sName"></strong>
@@ -131,33 +156,29 @@
         </div>
 
         <div class="sel-stats">
-                    <span>
-                        <small data-i="visitors">عدد الزوار المسجل</small>
-                        <b id="sCount">—</b>
-                    </span>
+          <span>
+            <small data-i="visitors">عدد الزوار المسجل</small>
+            <b id="sCount">—</b>
+          </span>
 
           <span>
-                        <small data-i="capacity">السعة</small>
-                        <b id="sCap">—</b>
-                    </span>
+            <small data-i="capacity">السعة</small>
+            <b id="sCap">—</b>
+          </span>
 
           <span>
-                        <small data-i="eventsToday">فعاليات اليوم</small>
-                        <b id="sEvents">—</b>
-                    </span>
+            <small data-i="eventsToday">فعاليات اليوم</small>
+            <b id="sEvents">—</b>
+          </span>
         </div>
 
         <button type="button"
                 class="btn btn-primary"
                 id="goBtn">
-
-                    <span class="material-symbols-rounded"
-                          aria-hidden="true">route</span>
-
+          <span class="material-symbols-rounded"
+                aria-hidden="true">route</span>
           <span data-i="showRoute">اعرض المسار</span>
         </button>
-
-        <div class="route-note" id="routeNote" hidden></div>
 
       </section>
 
@@ -197,11 +218,10 @@
             <div class="chips pick-chips" id="pickZones"></div>
           </fieldset>
 
-          <label class="field map-start-field">
-            <span data-i="startZone">نقطة البداية</span>
-            <select id="startSel"
-                    aria-label="نقطة البداية"></select>
-          </label>
+          <p class="map-start-note">
+            <span class="material-symbols-rounded" aria-hidden="true">my_location</span>
+            <span data-i="startFromPanel">نقطة البداية هي «موقعي الحالي» بجانب الخريطة.</span>
+          </p>
 
           <label class="field map-check-field">
             <input type="checkbox"

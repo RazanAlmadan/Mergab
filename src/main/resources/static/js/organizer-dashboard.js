@@ -151,6 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             controls: true,
 
+            // Organizer look: night command-center theme + 3D
+            theme: "organizer",
+            perspective: true,
+
             onSelect() {
                 window.location.href = "/organizer/zones";
             },
