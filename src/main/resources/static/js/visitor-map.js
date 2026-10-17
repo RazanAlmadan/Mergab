@@ -63,7 +63,32 @@
             suggestionEvent: 'فعالية قادمة',
             suggestionsEmpty: 'لا توجد اقتراحات حاليًا.',
             noConnections: 'لا يوجد مسار متصل من نقطة البداية إلى هذه المنطقة.',
-            noStart: 'اختاري نقطة بداية من القائمة.'
+            noStart: 'اختاري نقطة بداية من القائمة.',
+            calmest: 'الأهدأ',
+            fastest: 'الأسرع',
+            bestRoute: 'المسار الأمثل',
+            recommended: 'موصى به',
+            sameRoute: 'الأسرع هو الأهدأ أيضًا',
+            avoids: 'يتجنب',
+            headTo: 'اتجه نحو',
+            yourDest: 'وجهتك',
+            startNav: 'ابدأ الملاحة',
+            stopNav: 'إنهاء',
+            arrived: 'وصلت إلى',
+            remaining: 'متبقي',
+            meters: 'م',
+            whereTo: 'إلى أين تريد الذهاب؟',
+            whereToSub: 'اختر وجهتك ونرسم لك أذكى مسار، ونبعدك عن الزحام لحظة بلحظة.',
+            myLocation: 'موقعي الحالي',
+            pickExact: 'حدد مكاني على الخريطة',
+            zonesLbl: 'المناطق',
+            nearestLbl: 'الأقرب إليّ',
+            go: 'اذهب',
+            startFromPanel: 'نقطة البداية هي «موقعي الحالي» بجانب الخريطة.',
+            needLocation: 'حدد مكانك على الخريطة أولًا عشان نحسب أقرب مرفق.',
+            noNearby: 'ما فيه مرفق متصل بممرات منطقتك من هذا النوع.',
+            noFacilities: 'ما فيه مرافق مضافة حاليًا.',
+            youAreHereZone: 'أنت هنا'
         },
         en: {
             eyebrow: 'Explore Expo smarter',
@@ -109,7 +134,32 @@
             suggestionEvent: 'Upcoming event',
             suggestionsEmpty: 'No suggestions yet.',
             noConnections: 'No connected route from the starting zone.',
-            noStart: 'Choose a starting zone.'
+            noStart: 'Choose a starting zone.',
+            calmest: 'Calmest',
+            fastest: 'Fastest',
+            bestRoute: 'Best route',
+            recommended: 'Recommended',
+            sameRoute: 'Fastest is also the calmest',
+            avoids: 'Avoids',
+            headTo: 'Head to',
+            yourDest: 'Destination',
+            startNav: 'Start navigation',
+            stopNav: 'End',
+            arrived: 'You arrived at',
+            remaining: 'left',
+            meters: 'm',
+            whereTo: 'Where do you want to go?',
+            whereToSub: 'Pick a destination and we draw the smartest route away from the crowds.',
+            myLocation: 'My location',
+            pickExact: 'Pin me on the map',
+            zonesLbl: 'Zones',
+            nearestLbl: 'Nearest to me',
+            go: 'Go',
+            startFromPanel: 'Your starting point is “My location” next to the map.',
+            needLocation: 'Pin your exact spot on the map first to find the nearest facility.',
+            noNearby: 'No facility of this type is connected to your zone walkways.',
+            noFacilities: 'No facilities have been added yet.',
+            youAreHereZone: 'You are here'
         }
     };
 
@@ -226,35 +276,99 @@
             return;
         }
 
-        $('layers').innerHTML =
-            `<h2>${escapeHtml(t('mapNav'))}</h2>` +
+        const start = $('startSel')?.value;
 
-            ZONES.map(zone => {
-                const canShow = mappable(zone);
+        $('layers').innerHTML = ZONES.map(zone => {
+            const canShow = mappable(zone);
+            const here = String(zone.id) === String(start);
 
-                return `
-                    <button
-                        type="button"
-                        data-zone="${escapeHtml(zone.id)}"
-                        ${canShow ? '' : 'disabled'}
-                        aria-pressed="${selectedId === zoneId(zone)}">
+            return `
+                <button
+                    type="button"
+                    class="vm-dest ${here ? 'is-here' : ''}"
+                    data-zone="${escapeHtml(zone.id)}"
+                    ${canShow ? '' : 'disabled'}
+                    aria-pressed="${selectedId === zoneId(zone)}"
+                    title="${escapeHtml(canShow ? crowdName(zone) : t('notMapped'))}">
 
-                        <span class="map-dot"
-                              style="--c:${crowdColor(zone)}"></span>
+                    <span class="material-symbols-rounded" aria-hidden="true">
+                        ${here ? 'my_location' : 'location_on'}
+                    </span>
 
-                        <span class="map-layer-name">
-                            ${escapeHtml(zone.name)}
+                    <span class="vm-dest-name">${escapeHtml(zone.name)}</span>
 
-                            ${canShow ? '' : `
-                                <small class="map-layer-note">
-                                    ${escapeHtml(t('notMapped'))}
-                                </small>
-                            `}
-                        </span>
-                    </button>
-                `;
-            }).join('');
+                    <i class="vm-dot" style="--c:${crowdColor(zone)}"></i>
+                </button>
+            `;
+        }).join('');
     }
+
+    /* ---------------- Nearest facility chips ---------------- */
+
+    function renderQuickChips() {
+        const box = $('vmQuick');
+        const looks = window.MirqabMap?.FACILITY_LOOK || {};
+        const types = [...new Set(
+            ROUTE_NETWORK.facilities
+                .filter(f => f.mapX != null && f.mapY != null)
+                .map(f => f.type || 'DEFAULT')
+        )];
+
+        if (!types.length) {
+            box.innerHTML = `<p class="map-empty">${escapeHtml(t('noFacilities'))}</p>`;
+            return;
+        }
+
+        box.innerHTML = types.map(type => {
+            const look = looks[type] || looks.DEFAULT || { color: '#0F614B', label: { ar: type, en: type }, icon: '' };
+
+            return `
+                <button type="button" class="vm-qchip" data-ftype="${escapeHtml(type)}"
+                        style="--c:${look.color}">
+                    <span class="vm-qchip-ic">${look.icon}</span>
+                    ${escapeHtml(look.label?.[lang()] || look.label?.ar || type)}
+                </button>`;
+        }).join('');
+    }
+
+    $('vmQuick').addEventListener('click', event => {
+        const chip = event.target.closest('[data-ftype]');
+        if (!chip) return;
+
+        $('vmQuick').querySelectorAll('.vm-qchip')
+            .forEach(item => item.classList.toggle('is-on', item === chip));
+
+        if (!myLocationPoint) {
+            $('facilityRouteStatus').textContent = t('needLocation');
+            $('pickMyLocation').classList.add('is-pulse');
+            setTimeout(() => $('pickMyLocation').classList.remove('is-pulse'), 2400);
+            return;
+        }
+
+        const zoneKey = $('startSel').value;
+        let best = null;
+
+        ROUTE_NETWORK.facilities
+            .filter(f => (f.type || 'DEFAULT') === chip.dataset.ftype)
+            .forEach(facility => {
+                const result = findFacilityWalkingRoute(myLocationPoint, zoneKey, facility);
+
+                if (result && (!best || result.length < best.result.length)) {
+                    best = { facility, result };
+                }
+            });
+
+        if (!best) {
+            $('facilityRouteStatus').textContent = t('noNearby');
+            return;
+        }
+
+        if ([...$('facilityDest').options].some(o => o.value === String(best.facility.id))) {
+            $('facilityDest').value = String(best.facility.id);
+        }
+
+        showFacilityWalkingRoute(best.facility.id);
+    });
 
     /* ---------------- Crowd Levels ---------------- */
 
@@ -461,22 +575,287 @@
         map.setStart(String(from));
         map.select(String(targetId));
 
-        return map.showRoute(String(targetId), {
+        const route = map.showRoute(String(targetId), {
             from: String(from),
-            compare: false
+            compare: true,
+            use: routeChoice
         });
+
+        if (route?.shown) {
+            setNavRoute(route.shown.points, route.to?.name);
+        }
+
+        return route;
     }
+
+    /* ---------------- Route Options (fastest / calmest) ---------------- */
+
+    let routeChoice = 'best';
+
+    function crowdLevelOf(zoneKey) {
+        const info = currentMap()?.getZone(zoneKey);
+        return info?.level || 'unknown';
+    }
+
+    function routeCard(kind, route, title, icon, recommended) {
+        const busy = route.passes?.length
+            ? route.passes.join('، ')
+            : '';
+
+        return `
+            <button type="button"
+                    class="route-opt ${routeChoice === kind ? 'is-on' : ''}"
+                    data-route-kind="${kind}">
+                ${recommended ? `<span class="route-opt-badge">${escapeHtml(t('recommended'))}</span>` : ''}
+                <span class="route-opt-title">
+                    <span class="material-symbols-rounded" aria-hidden="true">${icon}</span>
+                    ${escapeHtml(title)}
+                </span>
+                <b class="route-opt-eta">${number(route.minutes)} <small>${escapeHtml(t('minutes'))}</small></b>
+                <small class="route-opt-meta">${number(route.meters)} ${escapeHtml(t('meters'))}${busy ? ' · ' + escapeHtml(busy) : ''}</small>
+            </button>`;
+    }
+
+    function renderRoutePanel(route) {
+        const note = $('routeNote');
+        note.hidden = false;
+
+        if (!route) {
+            note.textContent = t('noConnections');
+            return;
+        }
+
+        // Routes from the visitor's exact location (walkway graph)
+        if (!route.from) {
+            note.innerHTML = `
+                <div class="route-opts">
+                    ${routeCard('best', route.best, t('bestRoute'), 'route', true)}
+                </div>
+                ${navButtonHtml()}`;
+            return;
+        }
+
+        const best = route.best;
+        const direct = route.direct;
+        const steps = (route.shown || best).nodes || [];
+
+        const cards = direct
+            ? routeCard('best', best, t('calmest'), 'spa', true) +
+              routeCard('direct', direct, t('fastest'), 'bolt', false)
+            : routeCard('best', best, t('bestRoute'), 'verified', true) +
+              `<p class="route-opt-same">
+                   <span class="material-symbols-rounded" aria-hidden="true">check_circle</span>
+                   ${escapeHtml(t('sameRoute'))}
+               </p>`;
+
+        const stepItems = steps.slice(1).map((key, index, all) => {
+            const info = currentMap()?.getZone(key);
+            const last = index === all.length - 1;
+            const level = crowdLevelOf(key);
+
+            return `
+                <li class="route-step ${last ? 'is-last' : ''} lvl-${level}"
+                    style="animation-delay:${index * 80}ms">
+                    ${escapeHtml(last ? t('yourDest') : t('headTo'))}
+                    <b>${escapeHtml(info?.name || '')}</b>
+                    ${info?.levelText ? `<small>${escapeHtml(info.levelText)}${info.percent != null ? ' · ' + info.percent + '%' : ''}</small>` : ''}
+                </li>`;
+        }).join('');
+
+        note.innerHTML = `
+            <div class="route-opts">${cards}</div>
+            ${route.avoided?.length && routeChoice === 'best'
+                ? `<p class="route-avoid">${escapeHtml(t('avoids'))}: ${escapeHtml(route.avoided.join('، '))}</p>`
+                : ''}
+            <ol class="route-steps">${stepItems}</ol>
+            ${navButtonHtml()}
+            <p class="route-hint">${escapeHtml(t('routeHint'))}</p>`;
+    }
+
+    function navButtonHtml() {
+        return `
+            <button type="button" class="btn-go" data-nav="start">
+                <span class="material-symbols-rounded" aria-hidden="true">navigation</span>
+                ${escapeHtml(t('startNav'))}
+            </button>`;
+    }
+
+    $('routeNote').addEventListener('click', event => {
+        if (event.target.closest('[data-nav="start"]')) {
+            startNavigation();
+            $('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        const card = event.target.closest('[data-route-kind]');
+        if (!card || !selectedId) return;
+
+        routeChoice = card.dataset.routeKind;
+        showRouteToSelected();
+    });
+
+    /* ---------------- Navigation Mode ---------------- */
+
+    let navRoute = null;
+    let navTimer = null;
+
+    function setNavRoute(points, name) {
+        navRoute = points && points.length > 1
+            ? { points, name: name || '' }
+            : null;
+
+        renderNavButton();
+    }
+
+    function renderNavButton() {
+        const host = $('map');
+        let bar = host.querySelector('.mg-navbar');
+
+        const hasRoute = navRoute &&
+            host.querySelector('.mqm-rt');
+
+        if (!hasRoute) {
+            bar?.remove();
+            return;
+        }
+
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.className = 'mg-navbar';
+            host.appendChild(bar);
+        }
+
+        bar.innerHTML = `
+            <button type="button" class="mg-navbtn" data-nav="start">
+                <span class="material-symbols-rounded" aria-hidden="true">navigation</span>
+                ${escapeHtml(t('startNav'))}
+            </button>`;
+    }
+
+    function pointAt(points, lengths, distance) {
+        let i = 1;
+        while (i < lengths.length - 1 && lengths[i] < distance) i++;
+
+        const segment = lengths[i] - lengths[i - 1] || 1;
+        const k = Math.max(0, Math.min(1, (distance - lengths[i - 1]) / segment));
+        const a = points[i - 1];
+        const b = points[i];
+
+        return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+    }
+
+    function stopNavigation(arrived) {
+        if (navTimer) cancelAnimationFrame(navTimer);
+        navTimer = null;
+
+        const host = $('map');
+        host.querySelector('.mg-navhud')?.remove();
+        host.querySelector('#visitorNavWalker')?.remove();
+
+        const map = currentMap();
+        map?.setFollow?.(false);
+
+        if (arrived && navRoute) {
+            const toast = document.createElement('div');
+            toast.className = 'mg-navtoast';
+            toast.innerHTML = `<span class="material-symbols-rounded" aria-hidden="true">celebration</span>`;
+            toast.append(` ${t('arrived')} ${navRoute.name}`);
+            host.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+
+        setTimeout(() => map?.resetView?.(), arrived ? 900 : 0);
+        renderNavButton();
+    }
+
+    function startNavigation() {
+        const map = currentMap();
+        if (!navRoute || !map) return;
+
+        const points = navRoute.points;
+        const host = $('map');
+        const svg = host.querySelector('.mqm-isvg');
+        const ratio = svg?.clientWidth && svg?.clientHeight
+            ? svg.clientWidth / svg.clientHeight : 1.5;
+
+        // Cumulative lengths (aspect-corrected)
+        const lengths = [0];
+        for (let i = 1; i < points.length; i++) {
+            lengths.push(lengths[i - 1] + Math.hypot(
+                (points[i][0] - points[i - 1][0]) * ratio,
+                points[i][1] - points[i - 1][1]
+            ));
+        }
+
+        const total = lengths.at(-1);
+        const duration = Math.max(6000, Math.min(18000, total * 220));
+        const totalMinutes = Math.max(1, Math.round(total * 8 / 75));
+
+        host.querySelector('.mg-navbar')?.remove();
+
+        const hud = document.createElement('div');
+        hud.className = 'mg-navhud';
+        hud.innerHTML = `
+            <span class="mg-navhud-ic material-symbols-rounded" aria-hidden="true">navigation</span>
+            <div><b></b><small></small></div>
+            <button type="button" data-nav="stop" aria-label="${escapeHtml(t('stopNav'))}">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+            <i class="mg-navhud-bar"><i></i></i>`;
+        host.appendChild(hud);
+
+        hud.querySelector('b').textContent = `${t('headTo')} ${navRoute.name}`;
+
+        map.set3D?.(true);
+        map.setFollow?.(true);
+
+        const started = performance.now();
+        let lastFocus = 0;
+
+        function frame(now) {
+            const progress = Math.min(1, (now - started) / duration);
+            const point = pointAt(points, lengths, progress * total);
+
+            host.querySelector('#visitorNavWalker')?.remove();
+            window.MergabMap.drawLocationPin(host, point, 'visitorNavWalker');
+
+            if (now - lastFocus > 380) {
+                lastFocus = now;
+                map.focusOn?.(point[0], point[1], { zoom: 2.1 });
+            }
+
+            hud.querySelector('small').textContent =
+                `${number(Math.max(1, Math.round(totalMinutes * (1 - progress))))} ${t('minutes')} ${t('remaining')}`;
+            hud.querySelector('.mg-navhud-bar > i').style.width =
+                (progress * 100).toFixed(1) + '%';
+
+            if (progress >= 1) {
+                stopNavigation(true);
+                return;
+            }
+
+            navTimer = requestAnimationFrame(frame);
+        }
+
+        navTimer = requestAnimationFrame(frame);
+    }
+
+    $('map').addEventListener('click', event => {
+        const action = event.target.closest('[data-nav]');
+        if (!action) return;
+
+        event.stopPropagation();
+
+        if (action.dataset.nav === 'start') startNavigation();
+        else stopNavigation(false);
+    });
 
     function showRouteToSelected() {
         if (!selectedId) return;
 
         const route = drawRoute(selectedId);
 
-        $('routeNote').hidden = false;
-
-        $('routeNote').textContent = route
-            ? `${t('walk')}: ${number(route.best.meters)} m · ${number(route.best.minutes)} ${t('minutes')}. ${t('routeHint')}`
-            : t('noConnections');
+        renderRoutePanel(route);
     }
 
     /* ---------------- Route Planner ---------------- */
@@ -696,6 +1075,7 @@
         renderPickers();
         drawMyLocation();
         renderFacilityTargets();
+        renderQuickChips();
 
         if (activeFacilityId) {
             showFacilityWalkingRoute(activeFacilityId);
@@ -844,6 +1224,7 @@
             choosingMyLocation = false;
 
             $('startSel').value = String(zone.id);
+            renderLayers();
             currentMap()?.setStart(String(zone.id));
             currentMap()?.clearRoute();
 
@@ -947,20 +1328,11 @@
         svg.querySelector('#visitorLocationPin')?.remove();
         if (!myLocationPoint) return;
 
-        const pin = document.createElementNS(
-            'http://www.w3.org/2000/svg', 'circle'
+        window.MergabMap.drawLocationPin(
+            $('map'),
+            myLocationPoint,
+            'visitorLocationPin'
         );
-
-        pin.setAttribute('id', 'visitorLocationPin');
-        pin.setAttribute('cx', myLocationPoint[0]);
-        pin.setAttribute('cy', myLocationPoint[1]);
-        pin.setAttribute('r', '1.3');
-        pin.setAttribute('fill', '#2563EB');
-        pin.setAttribute('stroke', '#FFFFFF');
-        pin.setAttribute('stroke-width', '0.45');
-        pin.setAttribute('pointer-events', 'none');
-
-        svg.appendChild(pin);
     }
 
     $('pickMyLocation').addEventListener('click', () => {
@@ -996,11 +1368,21 @@
         const stage = $('map').querySelector('.mqm-istage');
         if (!stage) return;
 
-        const rect = stage.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
+        // Works for both flat and tilted (3D) map views
+        const mapPoint = currentMap()?.toMapPoint?.(
+            event.clientX,
+            event.clientY
+        );
 
-        const x = (event.clientX - rect.left) / rect.width * 100;
-        const y = (event.clientY - rect.top) / rect.height * 100;
+        const rect = stage.getBoundingClientRect();
+        if (!mapPoint && (!rect.width || !rect.height)) return;
+
+        const x = mapPoint
+            ? mapPoint[0]
+            : (event.clientX - rect.left) / rect.width * 100;
+        const y = mapPoint
+            ? mapPoint[1]
+            : (event.clientY - rect.top) / rect.height * 100;
 
         if (x < 0 || x > 100 || y < 0 || y > 100) return;
 
@@ -1027,6 +1409,7 @@
         choosingMyLocation = false;
 
         $('startSel').value = String(zone.id);
+            renderLayers();
         currentMap()?.setStart(String(zone.id));
         currentMap()?.clearRoute();
         $('routeNote').hidden = true;
@@ -1368,27 +1751,22 @@
         activeZoneRouteId = null;
         $('map').querySelector('#visitorInterZoneRoute')?.remove();
 
-        const path = document.createElementNS(
-            'http://www.w3.org/2000/svg',
-            'polyline'
-        );
+        window.MergabMap.drawRouteLine($('map'), result.points, {
+            id: 'visitorWalkingRoute',
+            startDot: false,
+            destLabel: facility.name
+        });
 
-        path.id = 'visitorWalkingRoute';
+        setNavRoute(result.points, facility.name);
 
-        path.setAttribute(
-            'points',
-            result.points.map(p => p.join(',')).join(' ')
-        );
-
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#2563EB');
-        path.setAttribute('stroke-width', '1.1');
-        path.setAttribute('stroke-linecap', 'round');
-        path.setAttribute('stroke-linejoin', 'round');
-        path.setAttribute('vector-effect', 'non-scaling-stroke');
-        path.setAttribute('pointer-events', 'none');
-
-        svg.appendChild(path);
+        const meters = Math.round(result.length * 8);
+        renderRoutePanel({
+            best: {
+                meters,
+                minutes: Math.max(1, Math.ceil(meters / 75)),
+                passes: [facility.name]
+            }
+        });
 
         activeFacilityId = facility.id;
         drawMyLocation();
@@ -1625,27 +2003,12 @@
         const svg = $('map').querySelector('.mqm-isvg');
         if (!svg) return null;
 
-        const line = document.createElementNS(
-            'http://www.w3.org/2000/svg', 'polyline'
-        );
+        window.MergabMap.drawRouteLine($('map'), result.points, {
+            id: 'visitorInterZoneRoute',
+            startDot: false
+        });
 
-        line.id = 'visitorInterZoneRoute';
-        line.setAttribute(
-            'points',
-            result.points.map(p => p.join(',')).join(' ')
-        );
-
-        Object.entries({
-            fill: 'none',
-            stroke: '#2563EB',
-            'stroke-width': '1.15',
-            'stroke-linecap': 'round',
-            'stroke-linejoin': 'round',
-            'vector-effect': 'non-scaling-stroke',
-            'pointer-events': 'none'
-        }).forEach(([name, value]) => line.setAttribute(name, value));
-
-        svg.appendChild(line);
+        setNavRoute(result.points, byId(targetId)?.name);
         drawMyLocation();
 
         activeZoneRouteId = String(targetId);
@@ -1661,7 +2024,27 @@
     }
 
 
-    bindZoneClicks('layers', 'data-zone');
+    // Destination grid: pick a zone → draw the route right away
+    $('layers').addEventListener('click', event => {
+        const button = event.target.closest('[data-zone]');
+        if (!button || button.disabled) return;
+
+        const map = currentMap();
+        if (!map) return;
+
+        const id = button.dataset.zone;
+        map.select(id);
+        selectedId = id;
+
+        if (id === $('startSel').value && !myLocationPoint) {
+            $('routeNote').hidden = true;
+            return;
+        }
+
+        routeChoice = 'best';
+        showRouteToSelected();
+        renderLayers();
+    });
     bindZoneClicks('crowd', 'data-zone');
     bindZoneClicks('sugList', 'data-zone');
 
@@ -1690,6 +2073,7 @@
     });
 
     $('startSel').addEventListener('change', event => {
+        renderLayers();
         myLocationPoint = null;
         choosingMyLocation = false;
         drawMyLocation();
@@ -1729,6 +2113,10 @@
     controller = window.MergabMap.mount('#map', {
         imageSrc: '/img/map/expo-map-concept.jpg',
         hideLocation: true,
+
+        // Visitor look: daylight theme + tilted 3D view
+        theme: 'visitor',
+        perspective: true,
 
         refreshMs: 30000,
 

@@ -146,6 +146,37 @@
         return edges;
     }
 
+    // Saved drawings between zones, keyed "from|to"
+    // so visitor routes follow the real drawn paths.
+    function toEdgePaths(connections, markers) {
+        const ids = new Set(markers.map(marker => marker.key));
+        const byKey = new Map(markers.map(m => [m.key, m]));
+        const out = {};
+
+        for (const connection of connections) {
+            const from = String(zoneId(connection?.fromZone ?? connection?.fromZoneId));
+            const to = String(zoneId(connection?.toZone ?? connection?.toZoneId));
+
+            if (!ids.has(from) || !ids.has(to) || from === to) continue;
+
+            let points = parsePoints(connection.pathPoints, 2);
+            if (!points.length) continue;
+
+            const a = byKey.get(from);
+            const b = byKey.get(to);
+            const d = (p, m) => (p[0] - m.x) ** 2 + (p[1] - m.y) ** 2;
+
+            if (d(points[0], b) + d(points.at(-1), a) <
+                d(points[0], a) + d(points.at(-1), b)) {
+                points = [...points].reverse();
+            }
+
+            if (!out[`${from}|${to}`]) out[`${from}|${to}`] = points;
+        }
+
+        return out;
+    }
+
     // ======================================
     // SAVED POINTS
     // ======================================
@@ -208,6 +239,125 @@
         parent.appendChild(element);
 
         return element;
+    }
+
+    // ======================================
+    // VISUAL HELPERS (redesign)
+    // ======================================
+
+    const LEVEL_COLORS = {
+        critical: "#E5484D",
+        high: "#F0803C",
+        medium: "#F2C94C",
+        low: "#3FB27F"
+    };
+
+    function svgRatioOf(svg) {
+        const w = svg?.clientWidth;
+        const h = svg?.clientHeight;
+        return w && h ? w / h : 1.5;
+    }
+
+    function pathFrom(points) {
+        return points
+            .map((p, i) => `${i ? "L" : "M"}${p[0]} ${p[1]}`)
+            .join(" ");
+    }
+
+    function lengthOf(points, ratio) {
+        let total = 0;
+
+        for (let i = 1; i < points.length; i++) {
+            total += Math.hypot(
+                (points[i][0] - points[i - 1][0]) * ratio,
+                points[i][1] - points[i - 1][1]
+            );
+        }
+
+        return total;
+    }
+
+    // Small glowing dots that travel along a saved path
+    function movingDots(layer, d, count, duration, ratio, color) {
+        for (let i = 0; i < count; i++) {
+            const dot = svgElement(layer, "g", {
+                class: "mg-dot"
+            });
+
+            svgElement(dot, "ellipse", {
+                rx: 1.25 / ratio,
+                ry: 1.25,
+                fill: color,
+                opacity: 0.35
+            });
+
+            svgElement(dot, "ellipse", {
+                rx: 0.5 / ratio,
+                ry: 0.5,
+                class: "mg-dot-head"
+            });
+
+            const motion = svgElement(dot, "animateMotion", {
+                dur: duration.toFixed(2) + "s",
+                repeatCount: "indefinite",
+                path: d,
+                begin: (-(duration / count) * i).toFixed(2) + "s"
+            });
+
+            motion.setAttribute("rotate", "auto");
+        }
+    }
+
+    function levelFromRatio(ratio) {
+        if (ratio == null || !Number.isFinite(ratio)) return null;
+        if (ratio >= 0.9) return "critical";
+        if (ratio >= 0.75) return "high";
+        if (ratio >= 0.5) return "medium";
+        return "low";
+    }
+
+    // Colour zone boundaries + heat glow from live occupancy
+    function paintCrowd(target, infos) {
+        const root = typeof target === "string"
+            ? document.querySelector(target) : target;
+
+        const layer = root?.querySelector("[data-mergab-saved-geometry]");
+        if (!layer || !Array.isArray(infos)) return;
+
+        const byId = new Map(
+            infos
+                .filter(info => info && info.id != null)
+                .map(info => [String(info.id), info])
+        );
+
+        layer.querySelectorAll("[data-zone-id]").forEach(node => {
+            const info = byId.get(node.dataset.zoneId);
+            const level = levelFromRatio(info?.ratio);
+            const color = level ? LEVEL_COLORS[level] : "#247C59";
+
+            if (node.classList.contains("mg-heat")) {
+                node.setAttribute("fill", level
+                    ? `url(#${node.dataset.gradPrefix}-${level})`
+                    : "none");
+
+                const scale = 0.7 + Math.min(1.1, info?.ratio || 0) * 0.6;
+                node.setAttribute("rx", (node.dataset.baseRx * scale).toFixed(3));
+                node.setAttribute("ry", (node.dataset.baseRy * scale).toFixed(3));
+                return;
+            }
+
+            if (node.classList.contains("mg-gdot")) {
+                node.setAttribute("fill", color);
+                return;
+            }
+
+            node.setAttribute("stroke", color);
+
+            if (node.classList.contains("mg-zone")) {
+                node.setAttribute("fill", color);
+                node.classList.toggle("mg-zone-crit", level === "critical");
+            }
+        });
     }
 
     function distanceSquared(point, zone) {
@@ -312,6 +462,20 @@
         // ZONE BOUNDARIES
         // ==================================
 
+        const ratio = svgRatioOf(svg);
+        const gradPrefix = "mgHeat" + Math.random().toString(36).slice(2, 8);
+        const defs = svgElement(layer, "defs", {});
+
+        Object.entries(LEVEL_COLORS).forEach(([level, color]) => {
+            const gradient = svgElement(defs, "radialGradient", {
+                id: `${gradPrefix}-${level}`
+            });
+
+            svgElement(gradient, "stop", { offset: "0", "stop-color": color, "stop-opacity": 0.75 });
+            svgElement(gradient, "stop", { offset: "0.55", "stop-color": color, "stop-opacity": 0.28 });
+            svgElement(gradient, "stop", { offset: "1", "stop-color": color, "stop-opacity": 0 });
+        });
+
         for (const zone of zones) {
 
             const points = parsePoints(
@@ -321,20 +485,70 @@
 
             if (!points.length) continue;
 
-            svgElement(layer, "polygon", {
+            const polygonPoints = points
+                .map(point => point.join(","))
+                .join(" ");
 
-                points: points
-                    .map(point => point.join(","))
-                    .join(" "),
+            // Crowd heat glow at the zone centre
+            if (validPosition(zone)) {
+                const xs = points.map(p => p[0]);
+                const ys = points.map(p => p[1]);
+                const rx = Math.max(3, (Math.max(...xs) - Math.min(...xs)) / 2);
+                const ry = Math.max(3, (Math.max(...ys) - Math.min(...ys)) / 2);
+
+                const heat = svgElement(layer, "ellipse", {
+                    class: "mg-heat",
+                    cx: zone.mapX,
+                    cy: zone.mapY,
+                    rx,
+                    ry,
+                    fill: "none",
+                    "data-zone-id": zone.id,
+                    "data-grad-prefix": gradPrefix
+                });
+
+                heat.dataset.baseRx = rx;
+                heat.dataset.baseRy = ry;
+            }
+
+            const groundDot = validPosition(zone) ? zone : null;
+
+            svgElement(layer, "polygon", {
+                class: "mg-zone",
+                "data-zone-id": zone.id,
+                points: polygonPoints,
 
                 fill: "#247C59",
-                "fill-opacity": 0.18,
+                "fill-opacity": 0.16,
 
                 stroke: "#247C59",
-                "stroke-opacity": 0.85,
-                "stroke-width": 0.5,
+                "stroke-opacity": 0.55,
+                "stroke-width": 3,
+                "stroke-linejoin": "round",
+                "vector-effect": "non-scaling-stroke"
+            });
+
+            svgElement(layer, "polygon", {
+                class: "mg-zone-edge",
+                "data-zone-id": zone.id,
+                points: polygonPoints,
+                stroke: "#247C59",
+                "stroke-width": 0.35,
                 "stroke-linejoin": "round"
             });
+
+            // Small pulsing dot where the zone label stands
+            if (groundDot) {
+                svgElement(layer, "ellipse", {
+                    class: "mg-gdot",
+                    "data-zone-id": zone.id,
+                    cx: zone.mapX,
+                    cy: zone.mapY,
+                    rx: 0.75 / ratio,
+                    ry: 0.75,
+                    fill: "#3FB27F"
+                });
+            }
         }
 
         // ==================================
@@ -365,30 +579,15 @@
                 zoneById
             );
 
-            const pathData = points
-                .map((point, index) => {
-                    const command =
-                        index === 0 ? "M" : "L";
+            const pathData = pathFrom(points);
 
-                    return (
-                        `${command} ` +
-                        `${point[0]} ${point[1]}`
-                    );
-                })
-                .join(" ");
-
-            // White outline
+            // Soft glow + white outline
             svgElement(layer, "path", {
-
                 d: pathData,
-
-                fill: "none",
+                class: "mg-line mg-conn-casing",
                 stroke: "#FFFFFF",
                 "stroke-opacity": 0.95,
-                "stroke-width": 1.25,
-
-                "stroke-linecap": "round",
-                "stroke-linejoin": "round"
+                "stroke-width": 1.35
             });
 
             // Gold route
@@ -397,15 +596,35 @@
                 "path",
                 {
                     d: pathData,
-
-                    fill: "none",
+                    class: "mg-line mg-conn",
                     stroke: "#B6863C",
-                    "stroke-width": 0.72,
-
-                    "stroke-linecap": "round",
-                    "stroke-linejoin": "round"
+                    "stroke-width": 0.75
                 }
             );
+
+            // Animated flow (from → to, as saved)
+            svgElement(layer, "path", {
+                d: pathData,
+                class: "mg-flow",
+                stroke: "#FFF6DF",
+                "stroke-width": 2,
+                "stroke-dasharray": "2 12",
+                "vector-effect": "non-scaling-stroke"
+            });
+
+            // Visitors moving along the connection
+            const travel = lengthOf(points, ratio);
+
+            if (travel > 4) {
+                movingDots(
+                    layer,
+                    pathData,
+                    travel > 25 ? 3 : 2,
+                    Math.max(3, Math.min(12, travel / 4.5)),
+                    ratio,
+                    "#E2B865"
+                );
+            }
 
             // ==============================
             // DIRECTION ARROWS
@@ -547,21 +766,52 @@
             "pointer-events": "none"
         });
 
-        function drawRoute(value, color, direction, title) {
+        const ratio = svgRatioOf(svg);
+
+        function drawRoute(value, color, direction, title, kind) {
             const points = parsePoints(value);
             if (points.length < 2) return;
 
-            const line = svgElement(layer, "polyline", {
-                points: points.map(p => p.join(",")).join(" "),
-                fill: "none",
+            const d = pathFrom(points);
+
+            svgElement(layer, "path", {
+                d,
+                class: `mg-line mg-${kind}-casing`,
+                stroke: "#FFFFFF",
+                "stroke-opacity": 0.85,
+                "stroke-width": 1.05
+            });
+
+            const line = svgElement(layer, "path", {
+                d,
+                class: "mg-line",
                 stroke: color,
-                "stroke-width": 0.65,
-                "stroke-linecap": "round",
-                "stroke-linejoin": "round",
+                "stroke-width": 0.6,
                 "pointer-events": "none"
             });
 
             svgElement(line, "title", {}).textContent = title;
+
+            // Flowing dashes show walking direction
+            const flow = svgElement(layer, "path", {
+                d: direction === "REVERSE" || direction === "FROM_FACILITY"
+                    ? pathFrom([...points].reverse())
+                    : d,
+                class: "mg-flow",
+                stroke: "#FFFFFF",
+                "stroke-width": 1.6,
+                "stroke-dasharray": kind === "access" ? "1.5 7" : "2 12",
+                "stroke-opacity": 0.9,
+                "vector-effect": "non-scaling-stroke"
+            });
+
+            if (direction === "BOTH") {
+                flow.style.animationDuration = "2.6s";
+            }
+
+            if (kind === "walk" && lengthOf(points, ratio) > 8) {
+                movingDots(layer, d, 1, Math.max(4, lengthOf(points, ratio) / 3), ratio, color);
+            }
 
             let longest = null;
             let maxLength = 0;
@@ -623,7 +873,8 @@
                 path.pathPoints,
                 "#247DB6",
                 path.direction,
-                path.name || "ممر داخلي"
+                path.name || "ممر داخلي",
+                "walk"
             );
         }
 
@@ -633,37 +884,86 @@
                 path.pathPoints,
                 "#D28B24",
                 path.direction,
-                "وصلة مرفق"
+                "وصلة مرفق",
+                "access"
             );
         }
+        const stage = root.querySelector(".mqm-istage");
+
         // Homepage already renders its own facility icons
-        if (root.id === "homeExpoMap") return;
+        if (root.id === "homeExpoMap" || !stage) return;
 
-        // Green: facility locations
-        for (const facility of network.facilities) {
-            if (facility.mapX == null || facility.mapY == null) {
-                continue;
-            }
+        // Facility pins (type-aware icons, shared with organizer pages)
+        global.MirqabMap?.facilityPins?.(stage, network.facilities);
+    }
 
-            const x = Number(facility.mapX);
-            const y = Number(facility.mapY);
+    // Animated route line used by visitor routes (same look as engine routes)
+    function drawRouteLine(target, points, options = {}) {
+        const root = typeof target === "string"
+            ? document.querySelector(target) : target;
 
-            if (!Number.isFinite(x) || !Number.isFinite(y)) {
-                continue;
-            }
+        const svg = root?.querySelector(".mqm-isvg");
 
-            const pin = svgElement(layer, "circle", {
-                cx: x,
-                cy: y,
-                r: 0.95,
-                fill: "#0F614B",
-                stroke: "white",
-                "stroke-width": 0.3
+        if (!svg || !global.MirqabMap?.buildRoute) return null;
+
+        return global.MirqabMap.buildRoute(svg, points, options);
+    }
+
+    // Pulsing "you are here" pin
+    function drawLocationPin(target, point, id) {
+        const root = typeof target === "string"
+            ? document.querySelector(target) : target;
+
+        const svg = root?.querySelector(".mqm-isvg");
+        if (!svg || !point) return null;
+
+        const ratio = svgRatioOf(svg);
+
+        const group = svgElement(svg, "g", {
+            id,
+            "pointer-events": "none"
+        });
+
+        svgElement(group, "ellipse", {
+            class: "mg-me-pulse",
+            cx: point[0], cy: point[1],
+            rx: 1.4 / ratio, ry: 1.4
+        });
+
+        svgElement(group, "ellipse", {
+            class: "mg-me-dot",
+            cx: point[0], cy: point[1],
+            rx: 1.05 / ratio, ry: 1.05
+        });
+
+        // "You are here" badge (HTML so it stays readable in 3D)
+        const stage = svg.parentNode;
+        stage.querySelectorAll(`.mg-me-badge[data-for="${id}"]`)
+            .forEach(badge => badge.remove());
+
+        const badge = document.createElement("div");
+        badge.className = "mg-me-badge";
+        badge.dataset.for = id;
+        badge.style.left = point[0] + "%";
+        badge.style.top = point[1] + "%";
+        badge.innerHTML = "<span></span>";
+        badge.firstChild.textContent =
+            document.documentElement.lang === "en" ? "You are here" : "أنت هنا";
+        stage.appendChild(badge);
+
+        // Remove the badge when the pin is removed
+        if (!svg._mgMeWatch && typeof MutationObserver !== "undefined") {
+            svg._mgMeWatch = new MutationObserver(() => {
+                stage.querySelectorAll(".mg-me-badge").forEach(item => {
+                    if (!svg.querySelector("#" + CSS.escape(item.dataset.for))) {
+                        item.remove();
+                    }
+                });
             });
-
-            svgElement(pin, "title", {}).textContent =
-                facility.name || "مرفق";
+            svg._mgMeWatch.observe(svg, { childList: true });
         }
+
+        return group;
     }
 
     // ======================================
@@ -703,6 +1003,11 @@
 
         let stopped = false;
         let busy = false;
+
+        // Recolour zones whenever the engine receives new occupancy
+        element.addEventListener("mqm:update", event => {
+            paintCrowd(element, event.detail);
+        });
 
         let savedConnections = [];
         let savedNetwork = {
@@ -801,10 +1106,16 @@
                             : "ar"
                     );
 
+                const edgePaths = toEdgePaths(
+                    savedConnections,
+                    markers
+                );
+
                 const signature =
                     JSON.stringify({
                         markers,
                         edges,
+                        edgePaths,
                         currentLang
                     });
 
@@ -850,6 +1161,12 @@
 
                                     imageFit: "contain",
 
+                                    perspective:
+                                        !!options.perspective,
+
+                                    theme:
+                                        options.theme || null,
+
                                     controls:
                                         options.controls !== false,
 
@@ -859,6 +1176,7 @@
                                         src: imageSrc,
                                         zones: markers,
                                         edges,
+                                        edgePaths,
                                         hub: null,
                                         metersPerUnit: 8
                                     },
@@ -906,6 +1224,7 @@
                         savedConnections
                     );
                     drawActiveNetwork(element, savedNetwork);
+                    paintCrowd(element, instance.getZones());
 
                     if (options.hideLocation) {
 
@@ -1008,7 +1327,10 @@
         toMarkers,
         toEdges,
         parsePoints,
-        drawSavedGeometry
+        drawSavedGeometry,
+        drawRouteLine,
+        drawLocationPin,
+        paintCrowd
     };
 
 })(window);
