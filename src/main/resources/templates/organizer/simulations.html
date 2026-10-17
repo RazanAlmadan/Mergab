@@ -27,6 +27,7 @@
   <script defer src="/js/auth.js"></script>
   <script defer src="/map/mirqab-map.js"></script>
   <script defer src="/js/organizer-simulations.js"></script>
+  <script defer src="/js/simulation-cinematic-mode.js"></script>
 </head>
 
 <body class="organizer-page">
@@ -279,6 +280,29 @@
               <strong id="simulationHighRiskZones">—</strong>
             </div>
           </div>
+        </div>
+
+
+
+        <div class="simulation-cinematic-toolbar">
+          <div class="simulation-cinematic-copy">
+            <span class="material-symbols-rounded">movie</span>
+
+            <div>
+              <strong>الوضع السينمائي للمحاكاة</strong>
+              <small>
+                عرض بصري حيّ لحركة الزوار على الممرات الداخلية
+                ووصلات المناطق أثناء تشغيل المحاكاة.
+              </small>
+            </div>
+          </div>
+
+          <label class="simulation-cinematic-switch">
+            <input type="checkbox"
+                   id="simulationCinematicToggle"
+                   checked>
+            <span>تفعيل الحركة السينمائية</span>
+          </label>
         </div>
 
 

@@ -35,6 +35,16 @@ public class ExpoEvent {
     @Column(columnDefinition = "int not null")
     private Integer expectedDemand;
 
+    @DecimalMin(value = "0.0", message = "mapX must be at least 0")
+    @DecimalMax(value = "100.0", message = "mapX cannot exceed 100")
+    @Column(nullable = true)
+    private Double mapX;
+
+    @DecimalMin(value = "0.0", message = "mapY must be at least 0")
+    @DecimalMax(value = "100.0", message = "mapY cannot exceed 100")
+    @Column(nullable = true)
+    private Double mapY;
+
     @ManyToOne
     @JoinColumn(name = "zone_id", nullable = false)
     private Zone zone;

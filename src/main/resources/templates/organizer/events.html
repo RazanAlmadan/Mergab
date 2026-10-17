@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="/css/organizer.css">
   <link rel="stylesheet" href="/css/organizer-zones.css">
   <link rel="stylesheet" href="/css/organizer-events.css">
+  <link rel="stylesheet" href="/css/event-location-picker.css">
 
   <script defer src="/js/auth.js"></script>
   <script defer src="/js/organizer-events.js"></script>
@@ -232,6 +233,54 @@
               </small>
             </div>
 
+          </div>
+
+          <div class="event-location-editor">
+            <div class="event-location-heading">
+              <div>
+                <strong>موقع الفعالية على الخريطة</strong>
+                <p>
+                  اختاري المنطقة أولًا، ثم اضغطي على مكان
+                  إقامة الفعالية داخل حدودها.
+                </p>
+              </div>
+              <button type="button"
+                      id="clearEventLocation"
+                      class="zones-secondary-btn">
+                مسح الموقع
+              </button>
+            </div>
+
+            <div class="event-location-map">
+              <img src="/img/map/expo-map-concept.jpg"
+                   alt="خريطة إكسبو لتحديد موقع الفعالية"
+                   id="eventLocationImage"
+                   draggable="false">
+
+              <svg id="eventLocationBoundaries"
+                   viewBox="0 0 100 100"
+                   preserveAspectRatio="none"
+                   aria-hidden="true"></svg>
+
+              <div id="eventLocationPin"
+                   class="event-location-pin"
+                   hidden>
+            <span class="material-symbols-rounded">
+                location_on
+            </span>
+              </div>
+            </div>
+
+            <div class="event-location-coordinates">
+        <span id="eventLocationStatus">
+            اختاري المنطقة لتحديد موقع الفعالية.
+        </span>
+
+              <span id="eventLocationValues">لم يُحدد موقع بعد</span>
+            </div>
+
+            <input type="hidden" id="eventMapX">
+            <input type="hidden" id="eventMapY">
           </div>
 
           <div id="eventFormMessage"
