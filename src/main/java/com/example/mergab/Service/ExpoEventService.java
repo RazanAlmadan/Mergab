@@ -70,6 +70,8 @@ public class ExpoEventService {
         oldEvent.setStartDateTime(expoEvent.getStartDateTime());
         oldEvent.setEndDateTime(expoEvent.getEndDateTime());
         oldEvent.setExpectedDemand(expoEvent.getExpectedDemand());
+        oldEvent.setMapX(expoEvent.getMapX());
+        oldEvent.setMapY(expoEvent.getMapY());
 
         expoEventRepository.save(oldEvent);
     }

@@ -34,6 +34,182 @@ document.addEventListener("DOMContentLoaded", () => {
     let saving = false;
 
     // =====================================
+// EVENT LOCATION PICKER
+// =====================================
+
+    function parseBoundary(value) {
+        try {
+            const points = typeof value === "string"
+                ? JSON.parse(value)
+                : value;
+
+            return Array.isArray(points) &&
+            points.length >= 3 &&
+            points.every(point =>
+                Array.isArray(point) &&
+                point.length === 2 &&
+                point.every(n =>
+                    typeof n === "number" &&
+                    Number.isFinite(n) &&
+                    n >= 0 && n <= 100
+                )
+            ) ? points : [];
+
+        } catch {
+            return [];
+        }
+    }
+
+    function isInsidePolygon(x, y, points) {
+        let inside = false;
+
+        for (
+            let i = 0, j = points.length - 1;
+            i < points.length;
+            j = i++
+        ) {
+            const a = points[i];
+            const b = points[j];
+
+            if (
+                (a[1] > y) !== (b[1] > y) &&
+                x < (b[0] - a[0]) *
+                (y - a[1]) / (b[1] - a[1]) + a[0]
+            ) {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
+    function renderEventBoundary() {
+        const svg = $("eventLocationBoundaries");
+        svg.replaceChildren();
+
+        const zone = zones.find(z =>
+            String(z.id) === String(zoneSelect.value)
+        );
+
+        if (!zone) return;
+
+        const boundary = parseBoundary(zone.boundaryPoints);
+
+        if (!boundary.length) {
+            $("eventLocationStatus").textContent =
+                "المنطقة بدون حدود مسجلة؛ حددي الموقع بحذر.";
+            return;
+        }
+
+        const polygon = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "polygon"
+        );
+
+        polygon.setAttribute(
+            "points",
+            boundary.map(p => p.join(",")).join(" ")
+        );
+
+        svg.appendChild(polygon);
+
+        $("eventLocationStatus").textContent =
+            "اضغطي داخل حدود المنطقة الخضراء لتحديد موقع الفعالية.";
+    }
+
+    function setEventLocation(x, y) {
+        const pin = $("eventLocationPin");
+
+        if (x == null || y == null) {
+            $("eventMapX").value = "";
+            $("eventMapY").value = "";
+
+            pin.hidden = true;
+
+            $("eventLocationValues").textContent =
+                "لم يُحدد موقع بعد";
+
+            return;
+        }
+
+        x = Number(x);
+        y = Number(y);
+
+        if (
+            !Number.isFinite(x) ||
+            !Number.isFinite(y) ||
+            x < 0 || x > 100 ||
+            y < 0 || y > 100
+        ) {
+            return;
+        }
+
+        $("eventMapX").value = x.toFixed(4);
+        $("eventMapY").value = y.toFixed(4);
+
+        pin.style.left = `${x}%`;
+        pin.style.top = `${y}%`;
+        pin.hidden = false;
+
+        $("eventLocationValues").textContent =
+            `X: ${x.toFixed(2)} — Y: ${y.toFixed(2)}`;
+
+        $("eventLocationStatus").textContent =
+            "تم تحديد الموقع. يمكنك الضغط على مكان آخر لتغييره.";
+    }
+
+    function locationInsideSelectedZone(x, y) {
+        const zone = zones.find(z =>
+            String(z.id) === String(zoneSelect.value)
+        );
+
+        const boundary = parseBoundary(zone?.boundaryPoints);
+
+        return boundary.length === 0 ||
+            isInsidePolygon(x, y, boundary);
+    }
+
+    $("eventLocationImage")
+        .closest(".event-location-map")
+        .addEventListener("click", event => {
+
+            if (!zoneSelect.value) {
+                $("eventLocationStatus").textContent =
+                    "اختاري المنطقة أولًا.";
+                return;
+            }
+
+            const rect = $("eventLocationImage")
+                .getBoundingClientRect();
+
+            if (!rect.width || !rect.height) return;
+
+            const x = (event.clientX - rect.left)
+                / rect.width * 100;
+
+            const y = (event.clientY - rect.top)
+                / rect.height * 100;
+
+            if (!locationInsideSelectedZone(x, y)) {
+                $("eventLocationStatus").textContent =
+                    "الموقع خارج حدود المنطقة المختارة.";
+                return;
+            }
+
+            setEventLocation(x, y);
+        });
+
+    $("clearEventLocation").addEventListener(
+        "click",
+        () => setEventLocation(null, null)
+    );
+
+    zoneSelect.addEventListener("change", () => {
+        setEventLocation(null, null);
+        renderEventBoundary();
+    });
+
+    // =====================================
     // ACCOUNT
     // =====================================
 
@@ -269,6 +445,13 @@ document.addEventListener("DOMContentLoaded", () => {
             ? String(originalZoneId)
             : "";
 
+        renderEventBoundary();
+
+        setEventLocation(
+            event?.mapX ?? null,
+            event?.mapY ?? null
+        );
+
         editor.hidden = false;
 
         editor.scrollIntoView({
@@ -284,6 +467,9 @@ document.addEventListener("DOMContentLoaded", () => {
         originalZoneId = null;
 
         form.reset();
+
+        setEventLocation(null, null);
+
         editor.hidden = true;
 
         $("eventFormMessage").hidden = true;
@@ -373,12 +559,31 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // LocalDateTime format expected by Spring Boot
+        const rawX = $("eventMapX").value;
+        const rawY = $("eventMapY").value;
+
+        const mapX = rawX === "" ? null : Number(rawX);
+        const mapY = rawY === "" ? null : Number(rawY);
+
+        if (
+            (mapX === null) !== (mapY === null) ||
+            (mapX !== null &&
+                (!Number.isFinite(mapX) || !Number.isFinite(mapY) ||
+                    !locationInsideSelectedZone(mapX, mapY)))
+        ) {
+            showFormMessage(
+                "موقع الفعالية غير صالح أو خارج حدود المنطقة."
+            );
+            return;
+        }
+
         const payload = {
             name,
             startDateTime: `${startInput}:00`,
             endDateTime: `${endInput}:00`,
-            expectedDemand
+            expectedDemand,
+            mapX,
+            mapY
         };
 
         saving = true;

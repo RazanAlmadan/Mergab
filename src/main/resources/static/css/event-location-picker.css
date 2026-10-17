@@ -1,0 +1,89 @@
+.event-location-editor {
+    margin: 18px 0;
+    padding: 18px;
+    border: 1px solid #d9e7dd;
+    border-radius: 16px;
+    background: #f7faf8;
+}
+
+.event-location-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.event-location-heading strong {
+    font-size: 14px;
+    color: #164d39;
+}
+
+.event-location-heading p {
+    margin: 5px 0 0;
+    color: #667b6e;
+    font-size: 12px;
+}
+
+.event-location-map {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #e8e5da;
+    cursor: crosshair;
+}
+
+.event-location-map img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+}
+
+#eventLocationBoundaries {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#eventLocationBoundaries polygon {
+    fill: rgba(31, 139, 98, .13);
+    stroke: #168a61;
+    stroke-width: .5;
+    vector-effect: non-scaling-stroke;
+}
+
+.event-location-pin {
+    position: absolute;
+    transform: translate(-50%, -90%);
+    color: #d69d39;
+    filter: drop-shadow(0 3px 3px #0007);
+    pointer-events: none;
+}
+
+.event-location-pin .material-symbols-rounded {
+    font-size: 38px;
+}
+
+.event-location-coordinates {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    color: #607869;
+    font-size: 12px;
+}
+
+@media (max-width: 650px) {
+    .event-location-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
