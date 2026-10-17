@@ -1440,6 +1440,7 @@
                 return points.slice(1).map((p, i) => ({
                     a: points[i],
                     b: p,
+                    walkId: w.id,
                     direction: w.direction || 'BOTH',
                     cuts: [0, 1]
                 }));
@@ -1481,10 +1482,10 @@
             return best;
         }
 
-        // Only allow a short estimated approach to the walkway.
+        // Reach the nearest saved walkway from anywhere inside this zone.
         const origin = nearest(start);
 
-        if (!origin || origin.d > 1.5) return null;
+        if (!origin) return null;
 
         origin.s.cuts.push(origin.t);
 
@@ -1515,6 +1516,54 @@
                 ) {
                     a.cuts.push(Math.max(0, Math.min(1, t)));
                     b.cuts.push(Math.max(0, Math.min(1, u)));
+                }
+            }
+        }
+
+        // Join walkway endpoints to other nearby walking segments.
+        // Small drawing gaps should not break a connected walking network.
+        // Never bridge two distant paths: units are map coordinates (0..100).
+        const nearbyWalkwayLinks = [];
+        const JUNCTION_TOLERANCE = 0.8;
+
+        for (let i = 0; i < walks.length; i++) {
+            const first = walks[i];
+
+            for (const endpoint of [first.a, first.b]) {
+                let closest = null;
+
+                for (let j = 0; j < walks.length; j++) {
+                    if (i === j) continue;
+
+                    const second = walks[j];
+                    if (first.walkId === second.walkId) continue;
+
+                    const dx = second.b[0] - second.a[0];
+                    const dy = second.b[1] - second.a[1];
+                    const length2 = dx * dx + dy * dy;
+                    const t = length2
+                        ? Math.max(0, Math.min(1,
+                            ((endpoint[0] - second.a[0]) * dx +
+                             (endpoint[1] - second.a[1]) * dy) / length2
+                        ))
+                        : 0;
+                    const projected = pointOn(second, t);
+                    const gap = distance(endpoint, projected);
+
+                    if (
+                        gap <= JUNCTION_TOLERANCE &&
+                        (!closest || gap < closest.gap)
+                    ) {
+                        closest = { segment: second, t, projected, gap };
+                    }
+                }
+
+                if (closest) {
+                    closest.segment.cuts.push(closest.t);
+                    nearbyWalkwayLinks.push({
+                        from: endpoint,
+                        to: closest.projected
+                    });
                 }
             }
         }
@@ -1590,6 +1639,13 @@
                 }
             }
         }
+
+        // Bidirectional short junctions; one-way directions remain enforced
+        // on the original walkway segments themselves.
+        nearbyWalkwayLinks.forEach(link => {
+            add(link.from, link.to);
+            add(link.to, link.from);
+        });
 
         add(start, origin.p);
 
@@ -1739,7 +1795,7 @@
             activeFacilityId = null;
 
             $('facilityRouteStatus').textContent =
-                'لا يوجد مسار مشي متصل لهذا المرفق، أو أن نقطة البداية بعيدة عن الممر.';
+                'لا يوجد مسار مشي متصل لهذا المرفق. تحققي من اتصال الممرات ووصلات المرفق.';
             return;
         }
 

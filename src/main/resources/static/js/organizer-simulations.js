@@ -318,6 +318,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 ])
         );
 
+        // Fallback only: new shared renderer draws boundaries and paths.
+        if (!window.MergabMap?.drawSavedGeometry) {
         // Saved zone boundaries
         zones.forEach(zone => {
             const boundary =
@@ -433,6 +435,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        }
+
         // Queue markers: only actual saved queue values
         rows.forEach(snapshot => {
             const queue =
@@ -520,6 +524,10 @@ document.addEventListener("DOMContentLoaded", () => {
             heat: true,
             controls: true,
 
+            // Same 3D engine and cinematic organizer theme as the new shared map.
+            theme: "organizer",
+            perspective: true,
+
             matchBy: "id",
 
             fields: {
@@ -544,18 +552,23 @@ document.addEventListener("DOMContentLoaded", () => {
             element.style.display = "none";
         });
 
-        drawMapOverlay(
-            snapshotsAtCurrentMinute()
-        );
-
-        mapEl.querySelector(".mqm-img")
-            ?.addEventListener(
-                "load",
-                () => drawMapOverlay(
-                    snapshotsAtCurrentMinute()
-                ),
-                { once: true }
+        // The visitor/organizer maps now share the same saved-zone and
+        // connection geometry renderer. Snapshot overlays stay separate.
+        const redrawMapLayers = () => {
+            window.MergabMap?.drawSavedGeometry?.(
+                mapEl, zones, connections
             );
+            drawMapOverlay(snapshotsAtCurrentMinute());
+            if (map?.getZones) {
+                window.MergabMap?.paintCrowd?.(
+                    mapEl, map.getZones()
+                );
+            }
+        };
+
+        redrawMapLayers();
+        mapEl.querySelector(".mqm-img")
+            ?.addEventListener("load", redrawMapLayers, { once: true });
 
         updateMinute();
     }
@@ -849,6 +862,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             map.setHeat(true);
+            window.MergabMap?.paintCrowd?.(mapEl, map.getZones());
 
         } else if (map) {
             map.setHeat(false);

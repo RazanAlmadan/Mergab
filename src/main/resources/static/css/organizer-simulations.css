@@ -598,3 +598,11 @@
         padding: 12px;
     }
 }
+
+/* Shared organizer 3D map look in the simulation only. */
+#simulationMap.mqm-theme-organizer .mqm-img {
+    filter: brightness(.42) saturate(.5) contrast(1.15) hue-rotate(-12deg);
+}
+#simulationMap.mqm-theme-organizer .mqm-isvg { z-index: 2; }
+#simulationMap #simulationCinematicLayer { pointer-events: none; }
+#simulationMap #simulationWalkerLayer { filter: drop-shadow(0 0 1.8px rgba(212, 255, 238, .85)); }
